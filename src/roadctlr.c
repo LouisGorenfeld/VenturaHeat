@@ -191,10 +191,6 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   
   // Scroll horizon based on speed and turn sharpness
   live->xHorizon += xScrollAmount;
-  if (FIXTOI(live->xHorizon) >= live->def->horizonTex->width)
-    live->xHorizon -= ITOFIX(live->def->horizonTex->width);
-  else if (FIXTOI(live->xHorizon) < 0)
-    live->xHorizon += ITOFIX(live->def->horizonTex->width);
 
   if (live->yOffsetHorizon < yOffsetDest)
   {
