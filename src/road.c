@@ -509,13 +509,12 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     int yStart = syLast - tex->height + FIXTOI(live->yOffsetHorizon);
     int yClipEnd = tex->height - FIXTOI(live->yOffsetHorizon);
     
-  if (FIXTOI(live->xHorizon) >= live->def->horizonTex->width)
-    live->xHorizon -= ITOFIX(live->def->horizonTex->width);
-  else if (live->xHorizon < 0)
-    live->xHorizon += ITOFIX(live->def->horizonTex->width);
+    if (FIXTOI(live->xHorizon) >= live->def->horizonTex->width)
+      live->xHorizon -= ITOFIX(live->def->horizonTex->width);
+    else if (live->xHorizon < 0)
+      live->xHorizon += ITOFIX(live->def->horizonTex->width);
   
-  assert(live->xHorizon >= 0);  
-
+    assert(live->xHorizon >= 0);  
 
     blitPCXClip
     (

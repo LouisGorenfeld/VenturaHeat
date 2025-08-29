@@ -135,9 +135,7 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   fixed_t yScrollAmount = -(getHillAmount(live) * (fixed_t)zAmt) >> 3;
   fixed_t yOffsetDest = -getHillAmount(live) << 8;
 
-  // TEMP: yScroll is disabled
   yOffsetDest = 0; // TODO: Maybe we want to use this again
-  yScrollAmount = 0;
 
   live->texOff =(live->texOff + zAmt) & ((1<<ZMAPBITS)-1);
   live->z += zAmt;
