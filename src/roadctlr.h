@@ -29,7 +29,9 @@
 #define MAXCARS 128
 
 // The range where objects are dropped off the map
-#define ZFARCULL 8192
+// 8192: Two "screens" ahead (0-4096 being "in front")
+#define ZFARCULL 8192 
+// -4096: One "screen" behind
 #define ZNEARCULL -4096
 
 /*

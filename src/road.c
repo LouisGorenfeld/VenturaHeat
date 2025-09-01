@@ -5,6 +5,7 @@
 #include "road.h"
 #include "draw.h"
 #include "lmath.h"
+#include "roadctlr.h" // NEARCULL/FARCULL
 
 //#define DEBUGDRAW
 //#define DXLIMIT
@@ -51,6 +52,7 @@ void roadInit(roadDef_t *def, roadLive_t *live)
   live->xBack  = 0<<16;
 }
 
+// TODO: Move into loadpcx
 void blitline(pcxImage_t *dest, int destxL, int desty, int destxR,
      pcxImage_t *src, int srcy)
 {
@@ -565,6 +567,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
 
     pObj = pObj->last;
   }
+
+  drawRadar(live, dest); 
 }
 
 // TODO: Interpolate between speeds so they don't transition too jarringly
@@ -590,4 +594,37 @@ fixed_t getHillAmount(roadLive_t *live)
     return live->ddySeg;
 
   return live->ddyFront;
+}
+
+void drawRadar(roadLive_t *live, pcxImage_t *dest) 
+{
+  const int baseX = 320 - 50;
+  const int baseY = 50;
+  const int zRange = ZFARCULL - ZNEARCULL;
+  roadObj_t *pObj = live->objHead;
+
+//  blitline(dest, baseX, baseY, baseX + FIXTOI(pObj->x * 40), 15);
+  while (pObj) {
+    // road z is 0-4096 , x is fixed_t -1.0 to +1.0 for on-the-road
+    if (pObj->x >= ITOFIX(-1) && pObj->x <= ITOFIX(1)) {
+      const int x = FIXTOI(pObj->x * 40);
+      const int y = (ZNEARCULL - pObj->z) >> 8;
+      assert((baseY+y) >= 0);
+      assert((baseY+y) < 200);
+      *(dest->lines[baseY + y] + baseX + x) = 15;
+      *(dest->lines[baseY + y] + baseX + x + 1) = 15;
+      *(dest->lines[baseY + y + 1] + baseX + x + 1) = 15;
+      *(dest->lines[baseY + y + 1] + baseX + x) = 15;
+    }
+
+      const int x = 0;
+      const int y = ZNEARCULL >> 8;
+      *(dest->lines[baseY + y] + baseX + x) = 10;
+      *(dest->lines[baseY + y] + baseX + x + 1) = 10;
+      *(dest->lines[baseY + y] + baseX + x + 2) = 10;
+      *(dest->lines[baseY + y] + baseX + x - 1) = 10;
+      *(dest->lines[baseY + y] + baseX + x - 2) = 10;
+
+    pObj = pObj->next;
+  }
 }
