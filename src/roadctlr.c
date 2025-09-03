@@ -6,6 +6,7 @@
 #include "gfxstor.h"
 
 #define ZSCENSPACING (ZFARPLANE/10)
+#define ZTRAFSPACING (ZFARPLANE/8)
 
 #define LIGHTCURVE 9000 //7000
 #define MEDCURVE 12000 //11000
@@ -146,6 +147,8 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     parseCommand(ctlr);
   }
 
+
+
   // TODO: We may want a CarCtlr if car logic starts dominating this module
   for (i=0; i < MAXCARS; i++)
   {
@@ -160,13 +163,20 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   }
 
 
+
+  ctlr->zCounterTraffic -= zAmt;
+  if (ctlr->zCounterTraffic < 0) {
+    roadCtlRollTraffic(ctlr, 0);
+    ctlr->zCounterTraffic += ZTRAFSPACING;
+  }
+
   // Put down scenery or chevrons
-  ctlr->zCounter -= zAmt;
-  if (ctlr->zCounter < 0)
+  ctlr->zCounterScenery -= zAmt;
+  if (ctlr->zCounterScenery < 0)
   {
     char nextCmd = peekCurveAhead(ctlr);
 
-    ctlr->zCounter += ZSCENSPACING;
+    ctlr->zCounterScenery += ZSCENSPACING;
 
     if (nextCmd == 'L' || nextCmd == 'h')
     {
@@ -234,11 +244,53 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
         roadCtlRemoveCar(ctlr, car);
     }
   }
+}
 
+void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
+{
+  int minZDistance = 1024;
+  int maxZDistance = 4096;
+  const fixed_t sixth = ITOFIX(1)/6;
+  const fixed_t laneXs[] = { 
+    sixth,
+    sixth*3,
+    sixth*5
+  };
 
-//  // Roll for new cars
-  if ((rand() & 255) == 0)
-    roadCtlAddCar(ctlr, (rand() & 65535) - 32767, ZFARPLANE-1, ITOFIX(155), CARTYPE_COUPE);
+  // We start out with traffic going 65 mph and build off that
+  fixed_t speed = (rank * 5) + 65;
+  fixed_t z = 1024;
+
+  // Roll one of these patterns for the 3 lanes:
+  // 1 2 3
+  // -
+  //   -
+  //     -
+  // -   - 
+  if (rand()&255 < 30) {
+    int pattern = rand() & 3;
+    if (pattern == 3) {
+      roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE);
+    }
+    else {
+      const int lane = pattern;      
+      roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, 0, CARTYPE_COUPE);
+    }
+  }
+
+  // If rank is > 3, you start getting ambulances in the right lane
+  // Prereq: rear view mirror 
+} 
+
+void roadCtlRollEvent(roadCtlr_t, int rank)
+{
+  // events:
+  // Left lane out (maybe becomes water..? construction?)
+  // Right lane out
+}
+
+void roadCtlAddTexChangeObj(roadCtlr_t, int texIdx) {
+
 }
 
 car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type)

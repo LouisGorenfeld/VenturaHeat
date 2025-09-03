@@ -333,7 +333,7 @@ fixed_t ddShiftCurve(fixed_t dd, int zIdx)
 {
   if (zIdx <= ZPOSCURVETHRESH3)
   {
-    return dd << 2;
+    return dd << 3;
   }
   else if (zIdx <= ZPOSCURVETHRESH2)
   {
@@ -353,15 +353,15 @@ fixed_t ddShiftHill(fixed_t dd, int zIdx)
 {
   if (zIdx <= ZPOSCURVETHRESH3)
   {
-    return dd << 2;
+    return dd << 5;
   }
   else if (zIdx <= ZPOSCURVETHRESH2)
   {
-    return dd << 1;
+    return dd << 3;
   }
   else if (zIdx <= ZPOSCURVETHRESH1)
   {
-    return 0;
+    return dd;
   }
   else
   {
