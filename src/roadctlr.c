@@ -6,7 +6,7 @@
 #include "gfxstor.h"
 
 #define ZSCENSPACING (ZFARPLANE/10)
-#define ZTRAFSPACING (ZFARPLANE/8)
+#define ZTRAFSPACING (ZFARPLANE)
 
 #define LIGHTCURVE 9000 //7000
 #define MEDCURVE 12000 //11000
@@ -22,7 +22,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "U,D,u,D,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
   ctlr->stage.cmd = testStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
@@ -86,6 +86,7 @@ void parseCommand(roadCtlr_t *ctlr)
       case 'T':  ch = parseTexChange(ctlr, ch);
                  break;
       case 0:
+        printf("End of road\n"); while(1);
         exit(9);  // End of the road
     }
 
@@ -248,35 +249,48 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
 
 void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
 {
+  if ((rand() & 3) == 0)
+    return; // Don't add anything this turn
+
+
+
   int minZDistance = 1024;
   int maxZDistance = 4096;
-  const fixed_t sixth = ITOFIX(1)/6;
-  const fixed_t laneXs[] = { 
-    sixth,
-    sixth*3,
-    sixth*5
+  const fixed_t third = ITOFIX(1)/3;
+  const fixed_t laneXs[] = {
+    -(1.0/6.0), 
+//    -third  -(1.0/6.0),
+    0,
+//    third +(1.0/6.0)
+    (1.0/6.0)
   };
 
+
+
+
   // We start out with traffic going 65 mph and build off that
-  fixed_t speed = (rank * 5) + 65;
-  fixed_t z = 1024;
+
+  fixed_t speed = ITOFIX(50);// ITOFIX((rank+1) * 65 + 5);
+//  speed = ITOFIX(100);
 
   // Roll one of these patterns for the 3 lanes:
   // 1 2 3
   // -
   //   -
   //     -
-  // -   - 
-  if (rand()&255 < 30) {
+  // -   - <-- staggered
     int pattern = rand() & 3;
     if (pattern == 3) {
-      roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE);
+        fixed_t z = ZFARPLANE-1;
+        roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE);
+        roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE);
+//      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
     else {
-      const int lane = pattern;      
-      roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, 0, CARTYPE_COUPE);
+        const int lane = pattern;      
+        roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE);
+//      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
-  }
 
   // If rank is > 3, you start getting ambulances in the right lane
   // Prereq: rear view mirror 

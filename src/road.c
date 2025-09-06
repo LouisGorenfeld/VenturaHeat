@@ -120,7 +120,7 @@ void blitline(pcxImage_t *dest, int destxL, int desty, int destxR,
 
 void roadCrash(char *str)
 {
-  printf("roadObj integrity: %s", str);
+  printf("roadObj integrity: %s", str);  while(1);
   exit(12);
 }
 
@@ -432,7 +432,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
 
     // Finding texture y coordinate:
     // Shift 12-bit z value down to a range that repeats a reasonable
-    // number of times for out 16px-high texture (arbitrary).
+    // number of times for our 32px-high texture (arbitrary).
 
     // TODO: Implement DRAWSIDE
 
