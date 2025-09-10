@@ -15,6 +15,8 @@
 #define MEDHILL 500
 #define SHARPHILL 1000
 
+void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank);
+
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
 
 void roadCtlInit(roadCtlr_t *ctlr)
@@ -258,11 +260,11 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
   int maxZDistance = 4096;
   const fixed_t third = ITOFIX(1)/3;
   const fixed_t laneXs[] = {
-    -(1.0/6.0), 
+    -ITOFIX(1.0/6.0), 
 //    -third  -(1.0/6.0),
     0,
 //    third +(1.0/6.0)
-    (1.0/6.0)
+    ITOFIX(1.0/6.0)
   };
 
 

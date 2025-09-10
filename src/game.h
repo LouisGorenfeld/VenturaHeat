@@ -34,6 +34,7 @@ typedef struct gameState_t
   roadCtlr_t roadCtlr;
   plrCtrls_t plrCtrls;
   unsigned char kaThump;
+  fixed_t hoodDuck;
 
 } gameState_t;
 

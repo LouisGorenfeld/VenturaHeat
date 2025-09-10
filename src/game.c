@@ -47,7 +47,7 @@ void killCar(gameState_t *state)
 
 void plrSteer(gameState_t *state, char amt)
 {
-  if (state->plrCar.car.speed < ITOFIX(15))
+  if (state->plrCar.car.speed == 0)
     return;
     
   state->plrCtrls.wheel += amt;
@@ -287,6 +287,8 @@ void doGameLogic(gameState_t *state)
 
   doGearBox(&state->plrCar, &state->plrCtrls);
 
+//  state->hoodDuck = state->plrCtrls.gas << 4;
+
   plrCar->car.speed -= state->plrCtrls.brake << 8;
 
   if (plrCar->car.speed < 0)
@@ -303,7 +305,7 @@ void doGameLogic(gameState_t *state)
     plrCar->skidding++;
   }
 
-  if (isPlrOffroad(state))
+  if (isPlrOffroad(state) || plrCar->car.speed == 0 /* rough idle */)
   {
     if (plrCar->car.speed > ITOFIX(MAXOFFROADSPEED))
       plrCar->car.speed -= ITOFIX(3);
@@ -413,7 +415,7 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
   roadDraw(&state->roadCtlr.roadLive, buf, 0);
   drawHud(state, buf);
   blitPCXSprite(&gCarHoodImg, buf, 0,
-                buf->height - gCarHoodImg.height - (state->kaThump&2)
+                buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );
 
 

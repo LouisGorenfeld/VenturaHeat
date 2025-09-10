@@ -31,6 +31,9 @@
 
 unsigned short hZMap[ZMAPLEN];
 
+void drawRadar(roadLive_t *live, pcxImage_t *dest);
+
+
 
 void calcZMap()
 {

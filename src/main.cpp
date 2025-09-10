@@ -8,6 +8,7 @@
 #include <sys/farptr.h>
 #include <crt0.h>
 #include <malloc.h>
+#include "player20.h"
 #include "loadpcx.h"
 #include "pcxfont.h"
 #include "road.h"
@@ -19,17 +20,20 @@ int gQuitNow = 0;
 int gFPS = 0;
 int gTicks = 0;
 int gLastFPS = 0;
+RADPlayer gRadPlayer;
 volatile int gTimerCounter = 0;
 
 _go32_dpmi_seginfo gOldTimer, gNewTimer;
 _go32_dpmi_seginfo gOldKB, gNewKB;
 
+FILE *gLogFP = 0;
+
 
 char gKeyDown[128];
 
-
 void handleTimer()
 {
+  gRadPlayer.Update();
 	if (++gTicks >= 50*2)
 	{
  		gLastFPS = gFPS / 2;
@@ -161,7 +165,7 @@ void waitVsync()
 void cleanup()
 {
  setMode(0x2);
-// stopTimer50Hz();
+ stopTimer50Hz();
  stopKeyboard();
 }
 
@@ -235,6 +239,46 @@ int sbPort()
   return strtol(c, NULL, 16);
 }
 
+void loadRAD() {
+  FILE *fp = fopen("data/main.rad", "rb");
+  char *data;
+  long size = -1;
+
+  if (!fp) {
+    printf("Could not load audio\n");
+    exit(3);
+  }
+
+  fseek(fp, 0, SEEK_END);
+  size = ftell(fp);
+  printf("Size is %d", (int)size);
+  fseek(fp, 0, SEEK_SET);
+  data = (char*)malloc(size);
+  fread(data, 1, size, fp);
+  fclose(fp);
+
+  gRadPlayer.Init(data, NULL);
+  gRadPlayer.PlayNote(4, 2, 0, 2);
+
+}
+
+void doSFX(gameState_t *gameState) 
+{  
+/*  #define MINRPMS 1200
+#define MAXRPMS 10000
+#define OVERRPMS 12000
+*/
+
+  int freq = (gameState->plrCar.rpms) >> 2;
+  uint16_t oct = (freq >> 10) & 0x07;
+  uint16_t rem = freq & 0x3FF;
+
+  if (rem < 256) rem = 256;
+
+  fprintf(gLogFP, "revs=%d revsShifted=%d oct=%d freq=%d\n", (int)gameState->plrCar.rpms, (int)gameState->plrCar.rpms>>2, (int)oct, (int)rem);
+
+  gRadPlayer.SetFrequencyDirect(4, oct, rem);
+}
 
 pcxFont_t gFont;
 int main(int argc, char *argv[])
@@ -245,6 +289,10 @@ int main(int argc, char *argv[])
  pcxImage_t fontImg, tex1;
  pcxImage_t dblBuf;
  atexit(cleanup);
+
+
+gLogFP = fopen("log.txt", "w");
+
  setMode(0x13);
 
  startKeyboard();
@@ -252,19 +300,18 @@ int main(int argc, char *argv[])
 
  dblBuf.height = 200;
  dblBuf.width = 320;
- dblBuf.pixels = malloc(dblBuf.height*dblBuf.width);
+ dblBuf.pixels = (unsigned char*)malloc(dblBuf.height*dblBuf.width);
  memset(dblBuf.pixels, 0, dblBuf.height*dblBuf.width);
- dblBuf.lines = malloc(sizeof(unsigned char*) * dblBuf.height);
+ dblBuf.lines = (unsigned char**)malloc(sizeof(unsigned char*) * dblBuf.height);
  for (i=0; i < dblBuf.height; i++)
    dblBuf.lines[i] = dblBuf.pixels + dblBuf.width*i;
-
-
 
 
  // TODO: Don't set palette here-- this load is only to get the pal :)
  loadPCXFile(&tex1, "data/roadtex2.pcx");
  setPal(tex1.pal);
  
+loadRAD();
 
  loadGfx();
  gameInit(&gameState);
@@ -272,7 +319,7 @@ int main(int argc, char *argv[])
  loadPCXFile(&fontImg, "data/font4x5.pcx");
  initFont(&fontImg, &gFont, 0, 4, 5);
 
- // startTimer50Hz();
+ startTimer50Hz();
 
  while (!gQuitNow)
  {
@@ -280,6 +327,7 @@ int main(int argc, char *argv[])
 
   doGameLogic(&gameState);
   doGameDraw(&gameState, &dblBuf);
+  doSFX(&gameState);
 
   waitVsync();
   flip(&dblBuf);
@@ -287,6 +335,9 @@ int main(int argc, char *argv[])
   doInput();
   gTimerCounter--;
  }
+
+ 
+fclose(gLogFP);
 
  return 0;
 }
