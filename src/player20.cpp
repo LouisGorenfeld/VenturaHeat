@@ -674,6 +674,42 @@ toneslide:
 
 
 
+void RADPlayer::SetFrequencyDirect(uint16_t channum, uint16_t f) {
+    // freq is 10-bit
+    // oct is 0-7
+
+    uint16_t range = 0x2AE - 0x156;
+    uint16_t oct = f / range;
+    uint16_t freq = f % range;
+
+    // Keep frequency range within the sweet spot
+    if (freq < 0x156) {
+        if (oct > 0) {
+            oct--;
+            freq += range;
+        } else {
+            freq = 0x156;
+        }
+    } 
+    else if (freq > 0x2AE) {
+        if (oct < 7) {
+            oct++;
+            freq -= range;
+        } else {
+            freq = 0x2AE;
+        }
+    }
+
+    uint16_t chan_offset = Chn2Offsets3[channum];
+    SetOPL3(0xA0 + chan_offset, freq & 0xFF);   // F-number (least significant)
+    SetOPL3(0xB0 + chan_offset, (freq >> 8 & 3) | (oct << 2) | (GetOPL3(0xB0 + chan_offset) & 0xE0));     // block value incl key-on
+
+    chan_offset = ChanOffsets3[channum];
+    SetOPL3(0xA0 + chan_offset, freq & 0xFF);
+    SetOPL3(0xB0 + chan_offset, (freq >> 8 & 3) | (oct << 2) | (GetOPL3(0xB0 + chan_offset) & 0xE0));
+}
+
+
 //==================================================================================================
 // Sets the OPL3 registers for a given instrument.
 //==================================================================================================

@@ -178,6 +178,9 @@ void carAccel(plrCar_t *plrCar, fixed_t mphIncrease, unsigned char gas)
   plrCar->car.speed += amt;
 }
 
+// TODO: When engaging the clutch after shifting, the RPMs are pulled towards
+// the target value rather than snapping suddenly to it. That way the player
+// also gets a slight surge as it's pulled down through the sweet spot.
 void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
 {
   unsigned char gas = ctrls->gas;

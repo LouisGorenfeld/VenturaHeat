@@ -33,7 +33,7 @@ char gKeyDown[128];
 
 void handleTimer()
 {
-  gRadPlayer.Update();
+//  gRadPlayer.Update();
 	if (++gTicks >= 50*2)
 	{
  		gLastFPS = gFPS / 2;
@@ -269,15 +269,11 @@ void doSFX(gameState_t *gameState)
 #define OVERRPMS 12000
 */
 
-  int freq = (gameState->plrCar.rpms) >> 2;
-  uint16_t oct = (freq >> 10) & 0x07;
-  uint16_t rem = freq & 0x3FF;
+  int freq = 50 + ((gameState->plrCar.rpms) >> 3);
+//  fprintf(gLogFP, "revs=%d revsShifted=%d oct=%d freq=%d\n", (int)gameState->plrCar.rpms, (int)gameState->plrCar.rpms>>2, (int)oct, (int)rem);
 
-  if (rem < 256) rem = 256;
-
-  fprintf(gLogFP, "revs=%d revsShifted=%d oct=%d freq=%d\n", (int)gameState->plrCar.rpms, (int)gameState->plrCar.rpms>>2, (int)oct, (int)rem);
-
-  gRadPlayer.SetFrequencyDirect(4, oct, rem);
+//  gRadPlayer.SetFrequencyDirect(4, oct, rem);
+  gRadPlayer.SetFrequencyDirect(4, freq);
 }
 
 pcxFont_t gFont;
