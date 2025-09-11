@@ -209,11 +209,19 @@ void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
       }
     }
 
-    car->rpms = rpmsForSpeed(car, car->car.speed);
+    int targetRPMs = rpmsForSpeed(car, car->car.speed);
+    if (car->rpms > targetRPMs) 
+    {
+      car->rpms = .9 * car->rpms + .1 * targetRPMs;
+    }
+    else 
+    {
+      car->rpms = targetRPMs;
+    }
   }
   else
   {
-    car->rpms += (800 * gas) >> 8;
+    car->rpms += (800 * gas) >> 9;
   }
 
   if (car->rpms >= OVERRPMS)
