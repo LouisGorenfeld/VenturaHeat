@@ -99,6 +99,9 @@ void plrStartShiftDn(gameState_t *state)
 
 void plrEndShift(gameState_t *state)
 {
+  // Retrigger to restart that phasing
+  triggerSfx(&state->sfxState, kSFX_Engine);
+
   if (state->plrCtrls.shift & 1)
   {
     state->plrCar.gear++;
@@ -266,12 +269,14 @@ void checkObjCollisions(gameState_t *state)
       // Hit left side
       state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
       state->plrCar.skidding = -40;
+      triggerSfx(&state->sfxState, kSFX_Crash);
     }
     else if (obj->sx >= 160 && obj->sx < 320)
     {
       // Hit right side
       state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
       state->plrCar.skidding = 40;
+      triggerSfx(&state->sfxState, kSFX_Crash);
     }
 
     obj = obj->next;
@@ -297,6 +302,8 @@ void doGameLogic(gameState_t *state)
   roadCtlCarLogic(&state->roadCtlr);
 
   doGearBox(&state->plrCar, &state->plrCtrls);
+  int freq = 50 + ((state->plrCar.rpms) >> 3);
+  setSfxFrequency(&state->sfxState, kSFX_Engine, freq);
 
 //  state->hoodDuck = state->plrCtrls.gas << 4;
 

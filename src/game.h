@@ -2,6 +2,7 @@
 #include "roadctlr.h"
 #include "road.h"
 #include "loadpcx.h"
+#include "sfx.h"
 
 // This module is a lot of the overarching game logic
 
@@ -35,12 +36,15 @@ typedef struct gameState_t
   plrCtrls_t plrCtrls;
   unsigned char kaThump;
   fixed_t hoodDuck;
+  sfxState_t sfxState;
 
 } gameState_t;
 
 
 void gameInit(gameState_t *state);
+
 void doGameLogic(gameState_t *state);
+
 void doGameDraw(gameState_t *state, pcxImage_t *buf);
 
 #endif
