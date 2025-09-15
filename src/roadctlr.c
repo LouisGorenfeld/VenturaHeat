@@ -260,11 +260,9 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
   int maxZDistance = 4096;
   const fixed_t third = ITOFIX(1)/3;
   const fixed_t laneXs[] = {
-    -ITOFIX(1.0/6.0), 
-//    -third  -(1.0/6.0),
+    -third,
     0,
-//    third +(1.0/6.0)
-    ITOFIX(1.0/6.0)
+    third
   };
 
 

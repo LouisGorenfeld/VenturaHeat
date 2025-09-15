@@ -6,6 +6,7 @@
 #include "pcxfont.h"
 #include "roadctlr.h"
 #include "cars.h"
+#include "math.h"
 
 extern pcxFont_t gFont;
 
@@ -14,7 +15,7 @@ extern char gKeyDown[128];
 
 #define MAXOFFROADSPEED 164
 #define MAXSTEER 256
-#define SPEEDLOSS 45000 // of 16.16 fixed point
+#define SPEEDLOSS FTOFIX(.25) // speed is multiplied against this in a crash; 16.16 fixed point
 
 pcxImage_t gCarHoodImg;
 
@@ -99,9 +100,6 @@ void plrStartShiftDn(gameState_t *state)
 
 void plrEndShift(gameState_t *state)
 {
-  // Retrigger to restart that phasing
-  triggerSfx(&state->sfxState, kSFX_Engine);
-
   if (state->plrCtrls.shift & 1)
   {
     state->plrCar.gear++;
@@ -181,9 +179,6 @@ void carAccel(plrCar_t *plrCar, fixed_t mphIncrease, unsigned char gas)
   plrCar->car.speed += amt;
 }
 
-// TODO: When engaging the clutch after shifting, the RPMs are pulled towards
-// the target value rather than snapping suddenly to it. That way the player
-// also gets a slight surge as it's pulled down through the sweet spot.
 void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
 {
   unsigned char gas = ctrls->gas;
@@ -212,6 +207,8 @@ void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
       }
     }
 
+    // When engaging the clutch after shifting, the RPMs are pulled towards
+    // the target value rather than snapping suddenly to it.
     int targetRPMs = rpmsForSpeed(car, car->car.speed);
     if (car->rpms > targetRPMs) 
     {
@@ -253,6 +250,8 @@ int isPlrOffroad(gameState_t *state)
 
 void checkObjCollisions(gameState_t *state)
 {
+  const int kSkidAmount = 70;
+
   // TODO: Handle being bumped from behind (if other car's speed is greater,
   // then it's from behind). Iterate through car list to find corresponding
   // roadObj
@@ -264,18 +263,18 @@ void checkObjCollisions(gameState_t *state)
     if (obj->z > ZNEARPLANE) // List is sorted by z
       break;
 
-    if (obj->sx >= 0 && obj->sx < 160)
+    if (obj->sx >= 0 && obj->sx < 160 && !state->plrCar.skidding)
     {
       // Hit left side
       state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
-      state->plrCar.skidding = -40;
+      state->plrCar.skidding = -kSkidAmount;
       triggerSfx(&state->sfxState, kSFX_Crash);
     }
-    else if (obj->sx >= 160 && obj->sx < 320)
+    else if (obj->sx >= 160 && obj->sx < 320 && !state->plrCar.skidding)
     {
       // Hit right side
       state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
-      state->plrCar.skidding = 40;
+      state->plrCar.skidding = kSkidAmount;
       triggerSfx(&state->sfxState, kSFX_Crash);
     }
 
@@ -303,6 +302,7 @@ void doGameLogic(gameState_t *state)
 
   doGearBox(&state->plrCar, &state->plrCtrls);
   int freq = 50 + ((state->plrCar.rpms) >> 3);
+  freq += rand() & 0x1f;
   setSfxFrequency(&state->sfxState, kSFX_Engine, freq);
 
 //  state->hoodDuck = state->plrCtrls.gas << 4;

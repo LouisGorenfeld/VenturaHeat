@@ -2,17 +2,21 @@
 #include "sfx.h"
 
 extern RADPlayer gRadPlayer;
+extern FILE *gLogFP;
 
-int triggerRequested(sfxState_t *sfx, sfxNum_t num) {
-    return (sfx->triggerState & (1<<num) && ! sfx->lastTriggerState & (1<<num)); 
+
+int isTriggerRequested(sfxState_t *sfx, sfxNum_t num) {
+    return ((sfx->triggerState & (1<<num)) && ! (sfx->lastTriggerState & (1<<num))); 
 }
 
-int ackTrigger(sfxState_t *sfx, sfxNum_t num) {
-    return sfx->triggerState & ~(1<<num);
+void ackTrigger(sfxState_t *sfx, sfxNum_t num) {
+    sfx->triggerState &= ~(1<<num);
+    fprintf(gLogFP, "ackTrigger: %d 0x%x\n", num, sfx->triggerState);
 }
 
 void triggerSfx(sfxState_t *sfx, sfxNum_t num) {
     sfx->triggerState |= (1<<num);
+    fprintf(gLogFP, "triggerSfx: %d 0x%x\n", num, sfx->triggerState);
 }
 
 void setSfxFrequency(sfxState_t *sfx, sfxNum_t num, int freq) {
@@ -21,18 +25,19 @@ void setSfxFrequency(sfxState_t *sfx, sfxNum_t num, int freq) {
 
 void tickSfx(sfxState_t *sfx) {
     // Channel 9
-    if (triggerRequested(sfx, kSFX_Skid)) {
+    if (isTriggerRequested(sfx, kSFX_Skid)) {
         ackTrigger(sfx, kSFX_Skid);
+        gRadPlayer.PlayNote(8, 2, 4, 2);
     }
-    else if (triggerRequested(sfx, kSFX_Engine)) {
+    else if (isTriggerRequested(sfx, kSFX_Engine)) {
         // Do not ack; engine stays on
         gRadPlayer.PlayNote(8, 2, 0, 2);
     }
 
     // Channel 8
-    if (triggerRequested(sfx, kSFX_Crash)) {
-        gRadPlayer.PlayNote(7, 0, 4, 4);
+    if (isTriggerRequested(sfx, kSFX_Crash)) {
         ackTrigger(sfx, kSFX_Crash);
+        gRadPlayer.PlayNote(7, 1, 3, 3);
     }
 
     sfx->lastTriggerState = sfx->triggerState;
