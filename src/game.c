@@ -359,10 +359,20 @@ void drawCrosshair(gameState_t *state, pcxImage_t *buf, int cx, int cy)
   hline(buf, cx+2, cy, cx+1, 15);
 }
 
+
 void drawHud(gameState_t *state, pcxImage_t *buf)
 {
- // fixed_t y = (ITOFIX(105) - state->roadCtlr.roadLive.ddyFront);
- // drawCrosshair(state, buf, 160 + (state->plrCtrls.wheel >> 2), FIXTOI(y));
+  // TODO: Fixed pt
+  static const float r = 15.0f;
+  static const float kMaxRPMs = OVERRPMS + 4000;
+  static const float angleRange =  6.28;
+  static const float x0 = 320 - 75;
+  static const float y0 = 200 - 25;
+  float angle = ((float)state->plrCar.rpms / kMaxRPMs) * (angleRange);
+  angle -= 3.14;
+  
+  drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
+  drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
 }
 
 extern int gTicks;
@@ -390,6 +400,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
   blitFont(&gFont, buf->pixels, dbgline, 8, 8);
 
   // RPMs in bottom corner
+  #if 0
   {
     plrCar_t *plr = &state->plrCar;
     gearDef_t *g = plr->gears + plr->gear;
@@ -421,7 +432,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
     drawSquare(buf, 10, 200-32, 10+width, 200-24, color);
     vline(buf, 10+64+2, 200-32, 200-24, 15);
   }
-
+#endif
 //  hline(buf, 160-32, 200-50, 160+32, 0);
 //  hline(buf, 160-32, 200-50+48, 160+32, 0);
 //  drawSquare(buf, 160-32, 120, 160+32, 120+48, 0);
@@ -431,10 +442,10 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
 {
 //  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
   roadDraw(&state->roadCtlr.roadLive, buf, 0);
-  drawHud(state, buf);
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );
+  drawHud(state, buf);
 
 
   drawDebug(state, buf);
