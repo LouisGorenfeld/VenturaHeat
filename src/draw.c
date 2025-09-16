@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "lmath.h"
 #include "loadpcx.h"
+#include "math.h" // abs
 
 void hline(pcxImage_t *dest, int x1, int y, int x2, char color)
 {
@@ -94,6 +95,32 @@ void drawSquare(pcxImage_t *dest, int x1, int y1, int x2, int y2, char color)
   }
   for (i=y1; i < y2; i++)
     hline(dest, x1, i, x2, color);
+}
+
+void drawLine(pcxImage_t *dest, int x1, int y1, int x2, int y2, char color)
+{
+  const int dx =  abs (x2 - x1);
+  const int sx = (x1 < x2)? 1 : -1;
+  const int dy = -abs (y2 - y1);
+  const int sy = (y1 < y2)? 1 : -1;
+  int err = dx + dy;
+  int e2; 
+ 
+  while (1) {
+    *(dest->lines[y1] + x1) = color;
+    if (x1 == x2 && y1 == y2) 
+      break;
+    
+    e2 = err << 1;
+    if (e2 >= dy) {
+       err += dy; 
+       x1 += sx; 
+    } 
+    if (e2 <= dx) { 
+      err += dx; 
+      y1 += sy; 
+    }
+  }
 }
 
 // TODO: Crop so we don't overwrite memory
