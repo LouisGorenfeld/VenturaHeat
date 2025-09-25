@@ -31,9 +31,10 @@
 
 unsigned short hZMap[ZMAPLEN];
 
+FILE *fp = 0; 
+
+
 void drawRadar(roadLive_t *live, pcxImage_t *dest);
-
-
 
 void calcZMap()
 {
@@ -46,6 +47,8 @@ void calcZMap()
 
 void roadInit(roadDef_t *def, roadLive_t *live)
 {
+  fp = fopen("roadobj.log", "w");
+
   memset(def, 0, sizeof(def));
   memset(live, 0, sizeof(live));
   calcZMap();
@@ -121,10 +124,31 @@ void blitline(pcxImage_t *dest, int destxL, int desty, int destxR,
   }
 }
 
-void roadCrash(char *str)
+void dumpRoad(roadLive_t *live) 
 {
-  printf("roadObj integrity: %s", str);  while(1);
+  roadObj_t *obj =  live->objHead;
+  while (obj = obj->next) 
+  {
+    fprintf(fp, "obj: pcx=%p x=%f z=%d\n", obj->img, FIXTOF(obj->x), obj->z);
+  }
+  fclose(fp);
+}
+
+void roadCrash(roadLive_t *live, char *str)
+{
+  printf("FATAL: roadObj integrity: %s", str);  
+  fprintf(fp, "FATAL: roadObj integrity: %s\n", str);
+  dumpRoad(live);
+  fflush(fp);
+  fclose(fp);
+  while(1);
   exit(12);
+}
+
+void roadWarn(roadLive_t *live, char *str)
+{
+  fprintf(fp, "WARNING: roadObj integrity: %s\n", str);  
+  dumpRoad(live);
 }
 
 int getObjIndex(roadLive_t *live, roadObj_t *obj)
@@ -153,7 +177,7 @@ void checkObjIntegrity(roadLive_t *live)
   {
     int count = 0;
     roadObj_t *o = live->objHead;
-    if (!live->objTail) roadCrash("Head without tail");
+    if (!live->objTail) roadCrash(live, "Head without tail");
 
     while (o)
     {
@@ -161,41 +185,41 @@ void checkObjIntegrity(roadLive_t *live)
       roadObj_t *o2 = o->next;
       while (o2)
       {
-        if (o == o2) roadCrash("Object is not unique");
+        if (o == o2) roadCrash(live, "Object is not unique");
         o2 = o2->next;
       }
       
       if (o->next)
       {
-        if (o->z > o->next->z) roadCrash("Object ahead of next");
+        if (o->z > o->next->z) roadWarn(live, "Object ahead of next");
       }
       else
       {
-        if (o != live->objTail) roadCrash("End of list is not tail");
+        if (o != live->objTail) roadCrash(live, "End of list is not tail");
       }
       
       o = o->next;
       count++;
     }
 
-    if (count != live->objCount) roadCrash("Count mismatch (forward)");
+    if (count != live->objCount) roadCrash(live, "Count mismatch (forward)");
   }
 
   if (live->objTail)
   {
     int count = 0;
     roadObj_t *o = live->objTail;
-    if (!live->objHead) roadCrash("Tail without head");
+    if (!live->objHead) roadCrash(live, "Tail without head");
 
     while (o)
     {
-      if (!o->last && live->objHead != o) roadCrash("Start of list is not head");
+      if (!o->last && live->objHead != o) roadCrash(live, "Start of list is not head");
 
       count++;
       o = o->last;
     }
 
-    if (count != live->objCount) roadCrash("Count mismatch (backward)");
+    if (count != live->objCount) roadCrash(live, "Count mismatch (backward)");
   }
 }
 
@@ -204,7 +228,7 @@ void insertRoadObj(roadLive_t *live, roadObj_t *obj, roadObj_t *p, int isBefore)
 {
   assert(obj);
   assert(p);
-
+  fprintf(fp, "insertRoadObj: obj=%p relativeTo=%p isBefore=%d\n", obj, obj, p, isBefore);
 
   if (isBefore)
   {
@@ -235,6 +259,7 @@ void insertRoadObj(roadLive_t *live, roadObj_t *obj, roadObj_t *p, int isBefore)
 
 void linkRoadObj(roadLive_t *live, roadObj_t *obj)
 {
+  fprintf(fp, "linkRoadObj: obj=%p\n", obj);
   if (!live->objHead)
   {
     live->objHead = obj;
@@ -272,6 +297,8 @@ void linkRoadObj(roadLive_t *live, roadObj_t *obj)
 // leaves you with a tail but no head
 void unlinkRoadObj(roadLive_t *live, roadObj_t *obj)
 {
+  fprintf(fp, "unlinkRoadObj: obj=%p\n", obj);
+
   // When there are two cars, first obj->next is 0 and
   if (live->objHead == obj)
     live->objHead = obj->next;   // This is where it sets it to 0. List seems linked OK. Head/tail confusion?
@@ -291,6 +318,8 @@ void unlinkRoadObj(roadLive_t *live, roadObj_t *obj)
 // Relink the road object to where it has moved
 void moveRoadObj(roadLive_t *live, roadObj_t *obj, int zAmt)
 {
+//  fprintf(fp, "moveRoadObj: obj=%p zAmt=%d\n", obj, zAmt);
+
   obj->z += zAmt;
 
   if (zAmt > 0)  // Into distance
@@ -326,7 +355,8 @@ void drawRow(pcxImage_t *dest, roadLive_t *live,
       // Fill in for anything not covered by texture (based on color of first
       // pixel of the texture)
       if (rr + texWidth < dest->width - 1)
-        hline(dest, rr + texWidth, sy, dest->width - 1, 96+12);
+//        hline(dest, rr + texWidth, sy, dest->width - 1, 96+12);
+        hline(dest, rr + texWidth, sy, dest->width - 1, 1);
       if (rl - texWidth > 0)
         hline(dest, 0, sy, rl - texWidth, 76);
 }

@@ -267,11 +267,8 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
 
 
 
-
   // We start out with traffic going 65 mph and build off that
-
-  fixed_t speed = ITOFIX(50);// ITOFIX((rank+1) * 65 + 5);
-//  speed = ITOFIX(100);
+  fixed_t speed = ITOFIX(150);// ITOFIX((rank+1) * 65 + 5);
 
   // Roll one of these patterns for the 3 lanes:
   // 1 2 3
