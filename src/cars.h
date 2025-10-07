@@ -100,7 +100,8 @@ typedef struct plrCar_t
 } plrCar_t;
 
 
-void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type);
+// The tex parameter is for specifying a texture for CARTYPE_DUMMY_SCEN
+void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type, int texNum);
 void carLogic(_roadCtlr_t *ctlr, car_t *car);
 void copyCar(car_t *c1, car_t *c2);
 

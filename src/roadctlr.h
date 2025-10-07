@@ -92,7 +92,8 @@ void roadCtlInit(roadCtlr_t *ctlr);
 void roadCtlSetTexture(roadCtlr_t *ctlr, texLoc_t loc, pcxImage_t *img);
 
 // Returns the car which has been allocated
-car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type);
+// texNum is only used for adding the scenery object
+car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum);
 void roadCtlRemoveCar(roadCtlr_t *ctlr, car_t *car);
 
 #endif

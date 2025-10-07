@@ -345,12 +345,13 @@ void moveRoadObj(roadLive_t *live, roadObj_t *obj, int zAmt)
 // Draw a row of the road on line sy with left and right of the road at
 // rl and rr, with the specified texture z
 void drawRow(pcxImage_t *dest, roadLive_t *live,
+     pcxImage_t *roadTex, pcxImage_t **sideTex,
      int sy, int rl, int rr, int zOff)
 {
       int texWidth = rr - rl;
-      blitline(dest, rr + texWidth, sy, rr, live->sideTex[0], (zOff>>4) % (live->sideTex[0]->height));
-      blitline(dest, rl, sy, rr, live->roadTex, (zOff>>4) % live->roadTex->height);
-      blitline(dest, rl - texWidth, sy, rl, live->sideTex[1], (zOff>>4) % (live->sideTex[1]->height));
+      blitline(dest, rr + texWidth, sy, rr, sideTex[0], (zOff>>4) % (sideTex[0]->height));
+      blitline(dest, rl, sy, rr, roadTex, (zOff>>4) % roadTex->height);
+      blitline(dest, rl - texWidth, sy, rl, sideTex[1], (zOff>>4) % (sideTex[1]->height));
 
       // Fill in for anything not covered by texture (based on color of first
       // pixel of the texture)
@@ -414,6 +415,9 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
   fixed_t skew = ITOFIX(live->xBack - live->xFront) / ROADH;
   fixed_t dx = 0, dy = 0;
   fixed_t y;
+
+  pcxImage_t *roadTex = live->roadTex;
+  pcxImage_t **sideTex = live->sideTex;
   
   int syLast = 0;
   roadObj_t *pObj;
@@ -432,15 +436,28 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     int sy = FIXTOI(y);
 
     // See if we've past the next sprite's Z. If so, assign its sy
-    // and move to the next sprite
+    // and move to the next sprite. If it's a scenery switch, assign
+    // the texture at the appropriate y
     while (pObj && z >= pObj->z)
     {
       if (pObj->z >= ZNEARPLANE)
       {
         if (!pObj->img)
         {
-          // TODO: Change tex if it's the correct obj type
           // TODO: Potentially use the first few low values for special types?
+        }
+        else if (pObj->type == CARTYPE_DUMMY_SCEN)
+        {
+          /*
+          if (pObj->x == 0) // road 
+            roadTex = pObj->img;
+          else if (pObj->x == -1) // left side
+            sideTex[0] = pObj->img;
+          else if (pObj->x == 1) // right side
+            sideTex[1] = pObj->img;
+            */
+           roadTex = getSideTex(0);
+           sideTex[0] = getRoadTex(0);
         }
         else
         {
@@ -466,12 +483,9 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     // Finding texture y coordinate:
     // Shift 12-bit z value down to a range that repeats a reasonable
     // number of times for our 32px-high texture (arbitrary).
-
-    // TODO: Implement DRAWSIDE
-
     if (sy < syLast)
     {
-      drawRow(dest, live, sy, rl, rr, zOff);
+      drawRow(dest, live, roadTex, sideTex, sy, rl, rr, zOff);
     }
     
     // Bring syLast up to sy

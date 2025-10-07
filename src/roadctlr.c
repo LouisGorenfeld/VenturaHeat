@@ -24,7 +24,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "T(00),T(10),_,U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
   ctlr->stage.cmd = testStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
@@ -54,7 +54,7 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   ch++;
   assert(*ch == ')');
 
-  roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN);
+  car_t *car = roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN, tex);
 
   return ch;
 }
@@ -183,19 +183,19 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
     if (nextCmd == 'L' || nextCmd == 'h')
     {
-        roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV);
+        roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
     }
     else if (nextCmd == 'R' || nextCmd == 'H')
     {
-        roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV);
+        roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
     }
     else
     {
       // Randomized trees
       if (rand() & 1)
-        roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE);
+        roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, -1);
       else
-        roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE);
+        roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, -1);
     }
 
   }
@@ -243,8 +243,21 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
       carLogic(ctlr, car);
 
       // Cull if outside z range
-      if (car->roadObj.z <= 0 || car->roadObj.z >= ZFARCULL)
+      if (car->roadObj.z <= 0 || car->roadObj.z >= ZFARCULL) 
+      {
+        // If it's a scenery change, then the scenery at the front of the screen
+        // becomes this one
+        if (car->type == CARTYPE_DUMMY_SCEN)
+        {
+          if (car->roadObj.x == 0)
+            ctlr->roadLive.roadTex = car->roadObj.img;
+          else if (car->roadObj.x == -1)
+            ctlr->roadLive.sideTex[0] = car->roadObj.img;
+          else if (car->roadObj.x == 1)
+            ctlr->roadLive.sideTex[1] = car->roadObj.img;
+        } 
         roadCtlRemoveCar(ctlr, car);
+      }
     }
   }
 }
@@ -279,13 +292,13 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
     int pattern = rand() & 3;
     if (pattern == 3) {
         fixed_t z = ZFARPLANE-1;
-        roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE);
-        roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE);
+        roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE, -1);
+        roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE, -1);
 //      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
     else {
         const int lane = pattern;      
-        roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE);
+        roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, -1);
 //      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
 
@@ -300,11 +313,8 @@ void roadCtlRollEvent(roadCtlr_t, int rank)
   // Right lane out
 }
 
-void roadCtlAddTexChangeObj(roadCtlr_t, int texIdx) {
-
-}
-
-car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type)
+// TODO We might want to wrap this in addScenaryObject and addCarObject and this becomes addRoadObject
+car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
 {
   int i;
   car_t *car;
@@ -322,12 +332,19 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
   
   car = ctlr->cars + i;
 
-  initCar(car, x, z, speed, type);
-  if (car->texNum >= 0)
-    car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);
-  else
-    car->roadObj.img = 0; //(pcxImage_t*)car->texNum; // typically -1 for dummy objects
-  
+  // TODO: Texnum for cars can be transformed into texNum*3, for texNum + offset, where offset
+  // is 0=left-angled, 1=centered,  
+  if (type != CARTYPE_DUMMY_SCEN) {
+  initCar(car, x, z, speed, type, texNum);
+  if (type != CARTYPE_DUMMY_SCEN)
+    car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);   
+  }
+  else {
+    if (x == 0)
+      car->roadObj.img = getRoadTex(car->texNum);
+    else 
+      car->roadObj.img = getSideTex(car->texNum);
+  }
 
   // Add it to the display list
   linkRoadObj(&ctlr->roadLive, &car->roadObj);

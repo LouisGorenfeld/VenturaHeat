@@ -30,8 +30,9 @@
 // An enemy/car/etc definition allocated elsewhere *has* a roadObj
 typedef struct roadObj_t roadObj_t;
 struct roadObj_t
-{
+{  
   // Controller fills these out, including choosing the right img for anim
+  int type;
   pcxImage_t *img;
   fixed_t x;
   int z;    // 0-4096 units of the ZMap (also see ZFARCULL and ZNEARCULL)

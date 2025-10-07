@@ -25,11 +25,12 @@ void carLogic(roadCtlr_t *ctlr, car_t *car)
   // TODO: We probably want a tiny peristent area before/after visible playfield
 }
 
-void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type)
+void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
 {
   car->speed = speed;
   car->roadObj.x = x;
   car->roadObj.z = z;
+  car->roadObj.type = car->type;
 
   switch (type)
   {
@@ -50,7 +51,7 @@ void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type)
       break;
 
     case CARTYPE_DUMMY_SCEN:
-      car->texNum = -1;
+      car->texNum = texNum;
       break;
 
     default:
