@@ -417,7 +417,10 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
   fixed_t y;
 
   pcxImage_t *roadTex = live->roadTex;
-  pcxImage_t **sideTex = live->sideTex;
+  pcxImage_t *sideTex[2];
+  sideTex[0] = live->sideTex[0];
+  sideTex[1] = live->sideTex[1];
+  
   
   int syLast = 0;
   roadObj_t *pObj;
@@ -435,6 +438,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     int zOff = z + live->texOff;
     int sy = FIXTOI(y);
 
+    // Sprite projection:
+    // ------------------
     // See if we've past the next sprite's Z. If so, assign its sy
     // and move to the next sprite. If it's a scenery switch, assign
     // the texture at the appropriate y
@@ -445,19 +450,6 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
         if (!pObj->img)
         {
           // TODO: Potentially use the first few low values for special types?
-        }
-        else if (pObj->type == CARTYPE_DUMMY_SCEN)
-        {
-          /*
-          if (pObj->x == 0) // road 
-            roadTex = pObj->img;
-          else if (pObj->x == -1) // left side
-            sideTex[0] = pObj->img;
-          else if (pObj->x == 1) // right side
-            sideTex[1] = pObj->img;
-            */
-           roadTex = getSideTex(0);
-           sideTex[0] = getRoadTex(0);
         }
         else
         {
@@ -476,16 +468,35 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
       pObj = pObj->next;
     }
 
-
     if (z >= ZFARPLANE)
       break;
 
     // Finding texture y coordinate:
     // Shift 12-bit z value down to a range that repeats a reasonable
     // number of times for our 32px-high texture (arbitrary).
+
+    // Search for the first texture change object
+    pObj = live->objHead;
+    while (pObj && pObj->type != CARTYPE_DUMMY_SCEN)
+      pObj = pObj->next;
+
     if (sy < syLast)
     {
-      drawRow(dest, live, roadTex, sideTex, sy, rl, rr, zOff);
+      if (pObj && pObj->sy == sy) 
+      {
+        if (pObj->x == 0) // road 
+          roadTex = pObj->img;
+        else if (pObj->x == -1) // left side
+          sideTex[0] = pObj->img;
+        else if (pObj->x == 1) // right side
+          sideTex[1] = pObj->img;
+
+        // Queue up next scenery change incident
+        while (pObj && pObj->type != CARTYPE_DUMMY_SCEN)
+          pObj = pObj->next;
+      }
+
+      drawRow(dest, live, roadTex, &sideTex[0], sy, rl, rr, zOff);
     }
     
     // Bring syLast up to sy
@@ -600,7 +611,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
   pObj = live->objTail;
   while (pObj)
   {
-    if (pObj->z >= ZNEARPLANE && pObj->z < ZFARPLANE)
+    if (pObj->type != CARTYPE_DUMMY_SCEN && pObj->z >= ZNEARPLANE && pObj->z < ZFARPLANE)
     {
       fixed_t width = pObj->scale * pObj->img->width;
       fixed_t height = pObj->scale * pObj->img->height;

@@ -263,19 +263,22 @@ void checkObjCollisions(gameState_t *state)
     if (obj->z > ZNEARPLANE) // List is sorted by z
       break;
 
-    if (obj->sx >= 0 && obj->sx < 160 && !state->plrCar.skidding)
+    if (obj->type != CARTYPE_DUMMY_SCEN) 
     {
-      // Hit left side
-      state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
-      state->plrCar.skidding = -kSkidAmount;
-      triggerSfx(&state->sfxState, kSFX_Crash);
-    }
-    else if (obj->sx >= 160 && obj->sx < 320 && !state->plrCar.skidding)
-    {
-      // Hit right side
-      state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
-      state->plrCar.skidding = kSkidAmount;
-      triggerSfx(&state->sfxState, kSFX_Crash);
+      if (obj->sx >= 0 && obj->sx < 160 && !state->plrCar.skidding)
+      {
+        // Hit left side
+        state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
+        state->plrCar.skidding = -kSkidAmount;
+        triggerSfx(&state->sfxState, kSFX_Crash);
+      }
+      else if (obj->sx >= 160 && obj->sx < 320 && !state->plrCar.skidding)
+      {
+        // Hit right side
+        state->plrCar.car.speed = FIXMUL(state->plrCar.car.speed, SPEEDLOSS);
+        state->plrCar.skidding = kSkidAmount;
+        triggerSfx(&state->sfxState, kSFX_Crash);
+      }
     }
 
     obj = obj->next;

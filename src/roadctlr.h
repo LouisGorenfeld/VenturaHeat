@@ -89,6 +89,7 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt);
 void roadCtlCarLogic(roadCtlr_t *ctlr);
 void roadCtlDraw(roadCtlr_t *ctlr, unsigned char *dest);
 void roadCtlInit(roadCtlr_t *ctlr);
+// Direct set texture call
 void roadCtlSetTexture(roadCtlr_t *ctlr, texLoc_t loc, pcxImage_t *img);
 
 // Returns the car which has been allocated

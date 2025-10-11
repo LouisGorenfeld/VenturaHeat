@@ -31,6 +31,7 @@ void loadGfxInternal(gfxStore_t *stor)
 
   // Side Textures
   loadPCXFile(stor->sideTex + 0, "data/grastex1.pcx");
+  loadPCXFile(stor->sideTex + 1, "data/iceroad.pcx");
 
 
 

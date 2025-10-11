@@ -27,10 +27,11 @@ void carLogic(roadCtlr_t *ctlr, car_t *car)
 
 void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
 {
+  car->type = type;
   car->speed = speed;
   car->roadObj.x = x;
   car->roadObj.z = z;
-  car->roadObj.type = car->type;
+  car->roadObj.type = type;
 
   switch (type)
   {

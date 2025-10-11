@@ -46,8 +46,10 @@ int gTimerInit=0;
 void startTimer50Hz()
 {
 	outportb(0x43, 0x34);
-	outportb(0x40, (23864 & 0xFF));
-	outportb(0x40, (23864 >> 8) & 0xFF);
+  int speed = 23846;  // 24000 if PIT is 1.2mhz.. how are we getting 23846?
+//  uint16_t speed = 17142; // 70hz if PIT is 1.2mhz 
+	outportb(0x40, (speed & 0xFF));
+	outportb(0x40, (speed >> 8) & 0xFF);
 
 	_go32_dpmi_get_protected_mode_interrupt_vector(8, &gOldTimer);
 	gNewTimer.pm_offset = (int)handleTimer;
@@ -260,8 +262,6 @@ void loadRAD() {
   gRadPlayer.Init(data, NULL);
 }
 
- 
-
 pcxFont_t gFont;
 int main(int argc, char *argv[])
 {
@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
  pcxImage_t fontImg, tex1;
  pcxImage_t dblBuf;
  atexit(cleanup);
-
 
 gLogFP = fopen("log.txt", "w");
 

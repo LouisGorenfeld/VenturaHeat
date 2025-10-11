@@ -19,12 +19,14 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank);
 
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
 
+char *parseTexChange(roadCtlr_t *ctlr, char *ch);
+
 void roadCtlInit(roadCtlr_t *ctlr)
 {
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "T(00),T(10),_,U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "R,H,T(01),T(11),_,U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
   ctlr->stage.cmd = testStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
@@ -37,6 +39,9 @@ void roadCtlInit(roadCtlr_t *ctlr)
   // TODO: Hack for now. Horizon location will change anyway
   ctlr->roadDef.horizonTex = getHorizonTex(0);
   ctlr->roadLive.yOffsetHorizon = ITOFIX(ctlr->roadDef.horizonTex->height >> 2);
+
+  // If you take this out now, it crashes. And it crashes once the texchange rolls past the end of the view
+  parseTexChange(ctlr, "T(11)");
 }
 
 char *parseTexChange(roadCtlr_t *ctlr, char *ch)
@@ -47,14 +52,14 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   assert(*ch == '(');
   ch++;
   assert(*ch >= '0' && *ch <= '9');
-  side = *ch - 0;
+  side = *ch - '0' - 1;
   ch++;
   assert(*ch >= '0' && *ch <= '9');
-  tex = *ch - 0;
+  tex = *ch - '0';
   ch++;
   assert(*ch == ')');
 
-  car_t *car = roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN, tex);
+  roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN, tex);
 
   return ch;
 }
@@ -256,6 +261,7 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
           else if (car->roadObj.x == 1)
             ctlr->roadLive.sideTex[1] = car->roadObj.img;
         } 
+        
         roadCtlRemoveCar(ctlr, car);
       }
     }
@@ -333,10 +339,9 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
   car = ctlr->cars + i;
 
   // TODO: Texnum for cars can be transformed into texNum*3, for texNum + offset, where offset
-  // is 0=left-angled, 1=centered,  
-  if (type != CARTYPE_DUMMY_SCEN) {
+  // is 0=left-angled, 1=centered, 2=right-angled
   initCar(car, x, z, speed, type, texNum);
-  if (type != CARTYPE_DUMMY_SCEN)
+  if (type != CARTYPE_DUMMY_SCEN) {
     car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);   
   }
   else {

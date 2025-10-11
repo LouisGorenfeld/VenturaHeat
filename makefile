@@ -1,6 +1,6 @@
 # Compiler
 #CC = i586-pc-msdosdjgpp-gcc
-CC = i586-pc-msdosdjgpp-g++
+CC = i586-pc-msdosdjgpp-g++ -O0 -g
 CFLAGS = -fpermissive
 
 SRC_DIR = src
