@@ -25,6 +25,9 @@ $(BUILD_DIR):
 run: $(TARGET)
 	dosbox-x -c "c:" -c "cd C:\DEV\roadv3" -c "$(BUILD_DIR)\roadv3.exe" #-c "exit"
 
+debug: $(TARGET)
+	dosbox-x -c "c:" -c "cd C:\DEV\roadv3" -c "gdb -ex run $(BUILD_DIR)\roadv3.exe" 
+
 clean:
 	rm -rf $(BUILD_DIR)
 

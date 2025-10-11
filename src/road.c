@@ -461,6 +461,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
           // Using z instead of tying scale to the width of the road at that line
           // is smoother, but costs a division.
           pObj->scale = (1<<FIXSHIFT<<7) / pObj->z;
+          if (pObj->scale == 0)
+            printf("SET SCALE TO 0 for z=%d\n", pObj->z);
           pObj->sx = FIXTOI(HSW16 + xoff + ((pObj->x>>8)*pObj->scale));
         }
       }
@@ -615,6 +617,12 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     {
       fixed_t width = pObj->scale * pObj->img->width;
       fixed_t height = pObj->scale * pObj->img->height;
+
+        if (pObj->scale == 0) {
+          continue; // this is bad though. If we comment this out, it locks up still
+//          printf("SCALE 0 for type=%d\n", pObj->type);  // type is 0??
+//          while(1);
+        }
 
       // TODO: Clip against horizon when on downslope
       blitPCXScaledSprite(pObj->img, dest,

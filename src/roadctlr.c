@@ -41,7 +41,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   ctlr->roadLive.yOffsetHorizon = ITOFIX(ctlr->roadDef.horizonTex->height >> 2);
 
   // If you take this out now, it crashes. And it crashes once the texchange rolls past the end of the view
-  parseTexChange(ctlr, "T(11)");
+//  parseTexChange(ctlr, "T(11)");
 }
 
 char *parseTexChange(roadCtlr_t *ctlr, char *ch)
