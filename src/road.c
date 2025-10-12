@@ -476,26 +476,24 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     // Finding texture y coordinate:
     // Shift 12-bit z value down to a range that repeats a reasonable
     // number of times for our 32px-high texture (arbitrary).
-
-    // Search for the first texture change object
-    pObj = live->objHead;
-    while (pObj && pObj->type != CARTYPE_DUMMY_SCEN)
-      pObj = pObj->next;
+    roadObj_t *scenObj = live->objHead;
+    while (scenObj && scenObj->type != CARTYPE_DUMMY_SCEN)
+      scenObj = scenObj->next;
 
     if (sy < syLast)
     {
-      if (pObj && pObj->sy == sy) 
+      if (scenObj && scenObj->sy == sy) 
       {
-        if (pObj->x == 0) // road 
-          roadTex = pObj->img;
-        else if (pObj->x == -1) // left side
-          sideTex[0] = pObj->img;
-        else if (pObj->x == 1) // right side
-          sideTex[1] = pObj->img;
+        if (scenObj->x == 0) // road 
+          roadTex = scenObj->img;
+        else if (scenObj->x == -1) // left side
+          sideTex[0] = scenObj->img;
+        else if (scenObj->x == 1) // right side
+          sideTex[1] = scenObj->img;
 
         // Queue up next scenery change incident
-        while (pObj && pObj->type != CARTYPE_DUMMY_SCEN)
-          pObj = pObj->next;
+        while (scenObj && scenObj->type != CARTYPE_DUMMY_SCEN)
+          scenObj = scenObj->next;
       }
 
       drawRow(dest, live, roadTex, &sideTex[0], sy, rl, rr, zOff);
@@ -598,7 +596,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
        drawSquare(dest, 0, 0, dest->width, yStart, tex->lines[0][0]);
     else
        drawSquare(dest, 0, 0, dest->width, syLast, tex->lines[0][0]);
-  }
+  } // next i in ZMAPLEN
 
 
 #ifdef DEBUGDRAW
