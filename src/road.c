@@ -403,16 +403,27 @@ fixed_t ddShiftHill(fixed_t dd, int zIdx)
   }
 }
 
+typedef struct renderState_t {
+  pcxImage_t *roadTex;
+  pcxImage_t *sideTex[2];
+  roadObj_t *pObj;
+  fixed_t hw;
+  fixed_t xoff;
+  fixed_t dx;
+  fixed_t dy;
+  fixed_t y;
+} renderState_t;
+
 void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
 {
   int i;
 
   // The +2 is a fudge factor because we clip to the near plane
   // and this changes the fov so that it narrows a little more
-  fixed_t narrow = (ITOFIX(live->halfWidth-1)) / ROADH;
+  const fixed_t narrow = (ITOFIX(live->halfWidth-1)) / ROADH;
+  const fixed_t skew = ITOFIX(live->xBack - live->xFront) / ROADH;
   fixed_t hw = ITOFIX(live->halfWidth);
   fixed_t xoff = ITOFIX(live->xFront); // front to back
-  fixed_t skew = ITOFIX(live->xBack - live->xFront) / ROADH;
   fixed_t dx = 0, dy = 0;
   fixed_t y;
 

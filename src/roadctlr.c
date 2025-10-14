@@ -8,9 +8,9 @@
 #define ZSCENSPACING (ZFARPLANE/10)
 #define ZTRAFSPACING (ZFARPLANE)
 
-#define LIGHTCURVE 9000 //7000
-#define MEDCURVE 12000 //11000
-#define SHARPCURVE 14000
+#define LIGHTCURVE 6000 //7000
+#define MEDCURVE 9000 //11000
+#define SHARPCURVE 12000
 #define LIGHTHILL 100
 #define MEDHILL 500
 #define SHARPHILL 1000
@@ -26,7 +26,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "R,H,T(01),T(11),_,U,D,l,_,l,r,u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "T(11),l,R,T(01),T(11),_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
   ctlr->stage.cmd = testStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
@@ -39,9 +39,6 @@ void roadCtlInit(roadCtlr_t *ctlr)
   // TODO: Hack for now. Horizon location will change anyway
   ctlr->roadDef.horizonTex = getHorizonTex(0);
   ctlr->roadLive.yOffsetHorizon = ITOFIX(ctlr->roadDef.horizonTex->height >> 2);
-
-  // If you take this out now, it crashes. And it crashes once the texchange rolls past the end of the view
-  parseTexChange(ctlr, "T(11)");
 }
 
 char *parseTexChange(roadCtlr_t *ctlr, char *ch)
@@ -148,7 +145,7 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
   live->texOff =(live->texOff + zAmt) & ((1<<ZMAPBITS)-1);
   live->z += zAmt;
-  live->segPos += zAmt<<9;//10; // below 8 shaves off so much that it never moves
+  live->segPos += zAmt<<10; // below 8 shaves off so much that it never moves
   if (live->segPos >= ZMAPLEN<<16)
   {
     live->segPos -= ZMAPLEN<<16;
