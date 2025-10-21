@@ -20,6 +20,8 @@ int gQuitNow = 0;
 int gFPS = 0;
 int gTicks = 0;
 int gLastFPS = 0;
+int gFrameskip = 1;
+
 RADPlayer gRadPlayer;
 volatile int gTimerCounter = 0;
 
@@ -34,20 +36,15 @@ char gKeyDown[128];
 void handleTimer()
 {
   gRadPlayer.Update();
-	if (++gTicks >= 50*2)
-	{
- 		gLastFPS = gFPS / 2;
- 		gTicks = 0;
- 		gFPS = 0;
-	}
+  gTimerCounter++;
 }
 
 int gTimerInit=0;
-void startTimer50Hz()
+void startTimer(int speed)
 {
 	outportb(0x43, 0x34);
-  int speed = 23846;  // 24000 if PIT is 1.2mhz.. how are we getting 23846?
-//  uint16_t speed = 17142; // 70hz if PIT is 1.2mhz 
+  const int pitSpeed = 1193180;
+  speed = pitSpeed/speed;
 	outportb(0x40, (speed & 0xFF));
 	outportb(0x40, (speed >> 8) & 0xFF);
 
@@ -59,7 +56,7 @@ void startTimer50Hz()
 	gTimerInit=1;
 }
 
-void stopTimer50Hz()
+void stopTimer()
 {
  if (gTimerInit)
  {
@@ -167,7 +164,7 @@ void waitVsync()
 void cleanup()
 {
  setMode(0x2);
- stopTimer50Hz();
+ stopTimer();
  stopKeyboard();
 }
 
@@ -242,7 +239,7 @@ int sbPort()
 }
 
 void loadRAD() {
-  FILE *fp = fopen("data/main.rad", "rb");
+  FILE *fp = fopen("data/tester.rad", "rb");
   char *data;
   long size = -1;
 
@@ -263,6 +260,7 @@ void loadRAD() {
 }
 
 pcxFont_t gFont;
+
 int main(int argc, char *argv[])
 {
  int i;
@@ -300,25 +298,40 @@ loadRAD();
  loadPCXFile(&fontImg, "data/font4x5.pcx");
  initFont(&fontImg, &gFont, 0, 4, 5);
 
- startTimer50Hz();
+ startTimer(70);
 
  // Start engine!
  triggerSfx(&gameState.sfxState, kSFX_Engine);
+// gRadPlayer.SetSpeed(5);
 
  while (!gQuitNow)
  {
+
+  if (!gFrameskip) {
+    doGameLogic(&gameState); 
+    doGameDraw(&gameState, &dblBuf);
+  }
+  while (gTimerCounter > 0) {
+    if (gFrameskip) {
+      doGameLogic(&gameState); 
+    }
+    if (++gTicks >= 70*2)
+    {
+      gLastFPS = gFPS / 2;
+      gTicks = 0;
+      gFPS = 0;
+    }
+
+    gTimerCounter--;
+  }
+
   gFPS++;
-
-  doGameLogic(&gameState);
   doGameDraw(&gameState, &dblBuf);
-  tickSfx(&gameState.sfxState);
-
   waitVsync();
   flip(&dblBuf);
-
   doInput();
-  gTimerCounter--;
- }
+ 
+}
 
  
 fclose(gLogFP);

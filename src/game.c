@@ -352,6 +352,9 @@ void doGameLogic(gameState_t *state)
   state->roadCtlr.roadLive.xBack = -state->plrCtrls.wheel >> 1;
   state->roadCtlr.roadLive.xFront = plrCar->car.roadObj.x >> 4;
   state->roadCtlr.roadLive.xHorizon = state->plrCtrls.wheel << 16;
+
+
+  tickSfx(&state->sfxState);
 }
 
 void drawCrosshair(gameState_t *state, pcxImage_t *buf, int cx, int cy)
@@ -379,6 +382,7 @@ void drawHud(gameState_t *state, pcxImage_t *buf)
 }
 
 extern int gTicks;
+extern int gLastFPS;
 void drawDebug(gameState_t *state, pcxImage_t *buf)
 {
   char dbgline[80];
@@ -390,8 +394,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
   hline(buf, 0, 1, 64, 1);
   buf->pixels[32+(state->plrCtrls.wheel>>2)] = 15;
 //  buf[320+32+(state->plrCar.car.facing>>16)] = 15;
-
-
+/*
   sprintf(dbgline, "segPos=%d   speed=%d   gear=%d  z=%d    x=%d   rL=%d   rR=%d",
                    state->roadCtlr.roadLive.segPos>>16,
                    state->plrCar.car.speed>>16,
@@ -399,7 +402,8 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
                    state->roadCtlr.roadLive.z,
                    state->plrCar.car.roadObj.x,
                    rl, rr
-  );
+  );*/
+  sprintf(dbgline, "FPS: %d", gLastFPS);
   blitFont(&gFont, buf->pixels, dbgline, 8, 8);
 
   // RPMs in bottom corner
@@ -443,7 +447,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
 
 void doGameDraw(gameState_t *state, pcxImage_t *buf)
 {
-//  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
+  //  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
   roadDraw(&state->roadCtlr.roadLive, buf, 0);
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
