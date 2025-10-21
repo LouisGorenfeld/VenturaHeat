@@ -1,6 +1,9 @@
 # Compiler
 #CC = i586-pc-msdosdjgpp-gcc
-CC = i586-pc-msdosdjgpp-g++ -O0 -g
+CC = i586-pc-msdosdjgpp-g++ -march=i486 -mtune=i486
+CFLAGS_DBG = -O0 -g
+CFLAGS_PROF = -pg -g -O3
+CFLAGS_PROD = -Os
 CFLAGS = -fpermissive
 
 SRC_DIR = src
@@ -17,7 +20,7 @@ $(TARGET): $(OBJS)
 	$(CC) -o $@ $^
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) $(CFLAGS_PROD) -o $@ $<
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -27,6 +30,10 @@ run: $(TARGET)
 
 debug: $(TARGET)
 	dosbox-x -c "c:" -c "cd C:\DEV\roadv3" -c "gdb -ex run $(BUILD_DIR)\roadv3.exe" 
+	
+prof: $(TARGET)
+	dosbox-x -c "c:" -c "cd C:\DEV\roadv3" -c "gprof $(BUILD_DIR)\roadv3.exe > gprof.out" 
+
 
 clean:
 	rm -rf $(BUILD_DIR)
