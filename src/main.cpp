@@ -239,7 +239,7 @@ int sbPort()
 }
 
 void loadRAD() {
-  FILE *fp = fopen("data/tester.rad", "rb");
+  FILE *fp = fopen("data/main.rad", "rb");
   char *data;
   long size = -1;
 
@@ -302,7 +302,7 @@ loadRAD();
 
  // Start engine!
  triggerSfx(&gameState.sfxState, kSFX_Engine);
-// gRadPlayer.SetSpeed(5);
+ gRadPlayer.SetSpeed(5);
 
  while (!gQuitNow)
  {

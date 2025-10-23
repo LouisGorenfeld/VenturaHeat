@@ -110,6 +110,7 @@ class RADPlayer {
         void                SetMasterVolume(int vol) {  MasterVol = vol;  }
         int                 GetMasterVolume() const {  return MasterVol;  }
         int                 GetSpeed() const {  return Speed;  }
+        void                SetSpeed(int x) {  Speed = x;  }
 
 #if RAD_DETECT_REPEATS
         uint32_t            ComputeTotalTime();
