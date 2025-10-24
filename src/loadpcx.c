@@ -163,16 +163,20 @@ void freePCX(pcxImage_t *img)
 
 void loadPCXFile(pcxImage_t *img, char *fn)
 {
-   FILE *fp;
+  FILE *fp;
 	unsigned char *data;
 	int len;
 
 	fp = fopen(fn, "rb");
+  if (!fp) {
+    printf("Could not open %s", fn);
+    while(1);
+  }
 
 	fseek(fp, 0, SEEK_END);
 	len = (int)ftell(fp);
 	
-        data = (unsigned char*)malloc(len);
+  data = (unsigned char*)malloc(len);
 	fseek(fp, 0, SEEK_SET);
 	fread(data, 1, len, fp);
 

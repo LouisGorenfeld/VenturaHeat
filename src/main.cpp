@@ -13,6 +13,7 @@
 #include "pcxfont.h"
 #include "road.h"
 #include "game.h"
+#include "draw.h"
 
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
@@ -259,14 +260,28 @@ void loadRAD() {
   gRadPlayer.Init(data, NULL);
 }
 
-pcxFont_t gFont;
+pcxFont_t gFontTiny, gFontDigi;
+
+void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
+{
+  char str[128];
+  sprintf(str, "%d", num);  
+  char *p = str;
+  int wx = x;
+  while (*p) {
+    const int rx = 24 * (*p - '0');
+    blitPCXClip(numImg, dblBuf, wx, y, rx, 0, rx + 24, numImg->height);
+    wx += 24;
+    p++;
+  }
+}
+
 
 int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
- //pcxImage_t extent;
- pcxImage_t fontImg, tex1;
+ pcxImage_t fontImg, fontDigiImg, tachImg, tex1;
  pcxImage_t dblBuf;
  atexit(cleanup);
 
@@ -296,7 +311,10 @@ loadRAD();
  gameInit(&gameState);
 
  loadPCXFile(&fontImg, "data/font4x5.pcx");
- initFont(&fontImg, &gFont, 0, 4, 5);
+ initFont(&fontImg, &gFontTiny, 0, 4, 5);
+
+ loadPCXFile(&fontDigiImg, "data/diginums.pcx");
+ loadPCXFile(&tachImg, "data/digitach.pcx");
 
  startTimer(70);
 
@@ -327,6 +345,22 @@ loadRAD();
 
   gFPS++;
   doGameDraw(&gameState, &dblBuf);
+
+
+  drawSquare(&dblBuf, 0, 0, 320, 32, 0);
+
+  // Draw tach
+  int cx = (float)tachImg.width * (float)gameState.plrCar.rpms / (float)OVERRPMS;
+  if (cx) {
+    blitPCXClip(&tachImg, &dblBuf, 24*4, 8, 0, 0, cx, tachImg.height);
+  }
+//  printf("--%d--\n", cx);while(1);
+
+//  blitFont(&gFontDigi, dblBuf.pixels, "ABC", 0, 0);
+//    blitPCX(&fontDigiImg, &dblBuf, 0, 0);
+  // TODO: We really might want to make a compatible font ..
+  drawDigiNum(&dblBuf, &fontDigiImg, FIXTOI(gameState.plrCar.car.speed), 0, 4);
+  drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
   waitVsync();
   flip(&dblBuf);
   doInput();

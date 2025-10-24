@@ -8,7 +8,8 @@
 #include "cars.h"
 #include "math.h"
 
-extern pcxFont_t gFont;
+extern pcxFont_t gFontTiny;
+extern pcxFont_t gFontDigi;
 
 
 extern char gKeyDown[128];
@@ -379,11 +380,15 @@ void drawHud(gameState_t *state, pcxImage_t *buf)
   
   drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
   drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
+
+
+
+  blitFont(&gFontDigi, buf->pixels, "123456", 0, 0);
 }
 
 extern int gTicks;
 extern int gLastFPS;
-void drawDebug(gameState_t *state, pcxImage_t *buf)
+void c(gameState_t *state, pcxImage_t *buf)
 {
   char dbgline[80];
   roadLive_t *live = &state->roadCtlr.roadLive;
@@ -404,7 +409,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
                    rl, rr
   );*/
   sprintf(dbgline, "FPS: %d", gLastFPS);
-  blitFont(&gFont, buf->pixels, dbgline, 8, 8);
+  blitFont(&gFontTiny, buf->pixels, dbgline, 8, 8);
 
   // RPMs in bottom corner
   #if 0
@@ -455,7 +460,7 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
   drawHud(state, buf);
 
 
-  drawDebug(state, buf);
+//  drawDebug(state, buf);
 }
 
 
