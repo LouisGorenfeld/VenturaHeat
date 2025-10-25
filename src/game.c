@@ -25,26 +25,9 @@ void gameInit(gameState_t *state)
   memset(state, 0, sizeof(gameState_t));
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
+  state->timeLeft = 60*70;
 
   loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
-}
-
-void doCarLogic(gameState_t *state) // TODO: Might end up in roadCtlr
-{
-/*
-  int i;
-  for (i=0; i < MAXCARS; i++)
-  {
-    if (state->ccars[i].logic)
-       state->cars[i].logic();
-  }
-  */
-
-}
-
-void killCar(gameState_t *state)
-{
-  // TODO: Copy last car over the one to kill
 }
 
 void plrSteer(gameState_t *state, char amt)
@@ -354,6 +337,7 @@ void doGameLogic(gameState_t *state)
   state->roadCtlr.roadLive.xFront = plrCar->car.roadObj.x >> 4;
   state->roadCtlr.roadLive.xHorizon = state->plrCtrls.wheel << 16;
 
+  state->timeLeft--;
 
   tickSfx(&state->sfxState);
 }
@@ -380,15 +364,11 @@ void drawHud(gameState_t *state, pcxImage_t *buf)
   
   drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
   drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
-
-
-
-  blitFont(&gFontDigi, buf->pixels, "123456", 0, 0);
 }
 
 extern int gTicks;
 extern int gLastFPS;
-void c(gameState_t *state, pcxImage_t *buf)
+void drawDebug(gameState_t *state, pcxImage_t *buf)
 {
   char dbgline[80];
   roadLive_t *live = &state->roadCtlr.roadLive;

@@ -26,7 +26,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "T(11),l,R,T(01),T(11),_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
   ctlr->stage.cmd = testStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
@@ -339,7 +339,12 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
   // is 0=left-angled, 1=centered, 2=right-angled
   initCar(car, x, z, speed, type, texNum);
   if (type != CARTYPE_DUMMY_SCEN) {
-    car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);   
+    if (type == CARTYPE_LCHEV)
+      car->roadObj.img = getCarTex(car->texNum, CARGFX_LEFT); 
+    else if (type == CARTYPE_RCHEV)
+      car->roadObj.img = getCarTex(car->texNum, CARGFX_RIGHT);
+    else
+      car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);
   }
   else {
     if (x == 0)

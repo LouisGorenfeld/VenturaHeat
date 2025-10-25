@@ -349,8 +349,10 @@ void blitPCXScaledSprite(pcxImage_t *img, pcxImage_t *dest,
      fixed_t xScale, fixed_t yScale,
      int yClip)
 {
-  fixed_t rx, ry;
+  if (xScale == 0 || yScale == 0)
+    return;
 
+  fixed_t rx, ry;
   fixed_t dx = (1<<FIXSHIFT<<8) / (xScale >> 8);
   fixed_t dy = (1<<FIXSHIFT<<8) / (yScale >> 8);
   fixed_t rxBegin = 0;
@@ -364,6 +366,7 @@ void blitPCXScaledSprite(pcxImage_t *img, pcxImage_t *dest,
 
   if (y >= dest->height)
     return;
+
 
 
   xClip = x + FIXTOI(xScale * img->width);

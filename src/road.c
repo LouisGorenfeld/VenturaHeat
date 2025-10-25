@@ -627,12 +627,6 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
       fixed_t width = pObj->scale * pObj->img->width;
       fixed_t height = pObj->scale * pObj->img->height;
 
-        if (pObj->scale == 0) {
-          continue; // this is bad though. If we comment this out, it locks up still
-//          printf("SCALE 0 for type=%d\n", pObj->type);  // type is 0??
-//          while(1);
-        }
-
       // TODO: Clip against horizon when on downslope
       blitPCXScaledSprite(pObj->img, dest,
                           pObj->sx - FIXTOI(width>>1), pObj->sy - FIXTOI(height),

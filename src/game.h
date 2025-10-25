@@ -31,6 +31,7 @@ typedef struct plrCtrls_t
 
 typedef struct gameState_t
 {
+  int timeLeft;
   plrCar_t plrCar;
   roadCtlr_t roadCtlr;
   plrCtrls_t plrCtrls;
