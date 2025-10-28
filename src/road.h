@@ -95,7 +95,8 @@ struct roadLive_t
   fixed_t halfWidth;        // half the width of the road
   unsigned char drawFlags;  // See DRAWSIDE defines
 
-  pcxImage_t *sideTex[2];   // Pointer to left and right side textures
+  pcxImage_t *sideTex[2];     // Pointer to left and right side textures
+  pcxImage_t *nextSideTex[2]; // Same, but for the brief road texture change 
   pcxImage_t *roadTex;
 
   fixed_t xHorizon;

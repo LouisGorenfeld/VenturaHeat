@@ -15,7 +15,7 @@
 #define MEDHILL 500
 #define SHARPHILL 1000
 
-void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank);
+void roadCtlDoTrafficGeneration(roadCtlr_t *ctlr, int rank);
 
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
 
@@ -27,7 +27,12 @@ void roadCtlInit(roadCtlr_t *ctlr)
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
-  ctlr->stage.cmd = testStr;
+
+
+
+  char *realStr = "!,_,_,l,u,dr,_,l,r,L,u,d,r,_,_,ru,|,rd,_,r,R,r,_,_";
+
+  ctlr->stage.cmd = realStr;
   ctlr->parsePos = ctlr->stage.cmd;
 
   roadInit(&ctlr->roadDef, &ctlr->roadLive);
@@ -89,6 +94,13 @@ void parseCommand(roadCtlr_t *ctlr)
                  break;
       case 'T':  ch = parseTexChange(ctlr, ch);
                  break;
+      case '|':  
+      /* Not working yet
+                roadCtlAddCar(ctlr, FTOFIX(-1.2), 4000, 0, CARTYPE_CHECKPOINT, -1);
+                roadCtlAddCar(ctlr, FTOFIX(1.2), 4000, 0, CARTYPE_CHECKPOINT_L, -1);
+                roadCtlAddCar(ctlr, FTOFIX(1.2), 4000, 0, CARTYPE_CHECKPOINT_R, -1);
+                */
+                break;                 
       case 0:
         printf("End of road\n"); while(1);
         exit(9);  // End of the road
@@ -171,8 +183,12 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
   ctlr->zCounterTraffic -= zAmt;
   if (ctlr->zCounterTraffic < 0) {
-    roadCtlRollTraffic(ctlr, 0);
-    ctlr->zCounterTraffic += ZTRAFSPACING;
+    roadCtlDoTrafficGeneration(ctlr, 0);
+    // ZTRAFSPACING right now is the spacing between the generator firing, and
+    // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
+    // to the far plane has elapsed
+    // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
+    ctlr->zCounterTraffic += 150 + (rand() & 255);
   }
 
   // Put down scenery or chevrons
@@ -265,15 +281,8 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
   }
 }
 
-void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
+void roadCtlDoTrafficGeneration(roadCtlr_t *ctlr, int rank)
 {
-  if ((rand() & 3) == 0)
-    return; // Don't add anything this turn
-
-
-
-  int minZDistance = 1024;
-  int maxZDistance = 4096;
   const fixed_t third = ITOFIX(1)/3;
   const fixed_t laneXs[] = {
     -third,
@@ -281,9 +290,9 @@ void roadCtlRollTraffic(roadCtlr_t *ctlr, int rank)
     third
   };
 
+  // Make sure the farthest car's z >= minZdistance from the end
 
 
-  // We start out with traffic going 65 mph and build off that
   fixed_t speed = ITOFIX(150);// ITOFIX((rank+1) * 65 + 5);
 
   // Roll one of these patterns for the 3 lanes:

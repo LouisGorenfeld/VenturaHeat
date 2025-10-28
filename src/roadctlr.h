@@ -14,6 +14,8 @@
 // 2/3/4/i set number of lanes/island (moves the two roads inward/outward)
 // F(RX)   for road R, toggle feature X (0=lcliff, 1=rcliff, 2=tunnel)
 // T(SX)   set texture X for side S (0=left, 1=road, 2=right)
+// t(SXY)   same, but briefly (for finish lines, crossroads, etc). Y specifies the
+//         texture it goes to after displaying one iteration of the X texture
 // G(SYX)  change generator for side S to style Y spitting out object X
 //         Styles: (0=sparse, 1=dense, 2=horizontal rows, 3=lining road)
 // O(RLX)  generate single object X in lane L on road R

@@ -33,6 +33,9 @@ typedef enum carType_t
   CARTYPE_LCHEV,
   // Texture change dummy object. The x is "side" (see roadctlr)
   CARTYPE_DUMMY_SCEN,
+  CARTYPE_CHECKPOINT,   // Overhead
+  CARTYPE_CHECKPOINT_L, // Left post
+  CARTYPE_CHECKPOINT_R  // Right post
 } carType_t;
 
 typedef struct car_t

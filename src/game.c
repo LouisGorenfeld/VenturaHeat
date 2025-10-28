@@ -337,7 +337,8 @@ void doGameLogic(gameState_t *state)
   state->roadCtlr.roadLive.xFront = plrCar->car.roadObj.x >> 4;
   state->roadCtlr.roadLive.xHorizon = state->plrCtrls.wheel << 16;
 
-  state->timeLeft--;
+  if (state->timeLeft > 0)
+    state->timeLeft--;
 
   tickSfx(&state->sfxState);
 }
@@ -362,8 +363,8 @@ void drawHud(gameState_t *state, pcxImage_t *buf)
   float angle = ((float)state->plrCar.rpms / kMaxRPMs) * (angleRange);
   angle -= 3.14;
   
-  drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
-  drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
+//  drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
+//  drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
 }
 
 extern int gTicks;

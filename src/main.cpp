@@ -361,10 +361,7 @@ loadRAD();
   // TODO: We really might want to make a compatible font ..
   drawDigiNum(&dblBuf, &fontDigiImg, FIXTOI(gameState.plrCar.car.speed), 0, 4);
   drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
-  if (gameState.timeLeft)
-    drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
-  else
-    blitFont(&gFontTiny, dblBuf.pixels, "TIME OVER", 100, 300);
+  drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
   waitVsync();
   flip(&dblBuf);
   doInput();

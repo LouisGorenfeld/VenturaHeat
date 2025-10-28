@@ -46,7 +46,10 @@ void loadGfxInternal(gfxStore_t *stor)
   cg = stor->carGfx + 2;
   loadPCXFile(&cg->images[CARGFX_CENTER], "data/tree.pcx");
 
-
+  cg = stor->carGfx + 3;
+  loadPCXFile(&cg->images[CARGFX_LEFT],  "data/lcheckp.pcx");
+  loadPCXFile(&cg->images[CARGFX_RIGHT], "data/rcheckp.pcx");
+  loadPCXFile(&cg->images[CARGFX_RIGHT], "data/checkp.pcx");
 
   // Horizon Textures
   loadPCXFile(stor->horizonTex + 0, "data/horicity.pcx");
