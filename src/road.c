@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "cars.h"
 #include "road.h"
 #include "draw.h"
 #include "lmath.h"
@@ -311,6 +312,7 @@ void unlinkRoadObj(roadLive_t *live, roadObj_t *obj)
     obj->next->last = obj->last;
 
   live->objCount--;
+  obj->car = NULL;
   
   checkObjIntegrity(live);
 }
@@ -488,7 +490,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     // Shift 12-bit z value down to a range that repeats a reasonable
     // number of times for our 32px-high texture (arbitrary).
     roadObj_t *scenObj = live->objHead;
-    while (scenObj && scenObj->type != CARTYPE_DUMMY_SCEN)
+    while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
       scenObj = scenObj->next;
 
     if (sy < syLast)
@@ -503,7 +505,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
           sideTex[1] = scenObj->img;
 
         // Queue up next scenery change incident
-        while (scenObj && scenObj->type != CARTYPE_DUMMY_SCEN)
+        while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
           scenObj = scenObj->next;
       }
 
@@ -622,7 +624,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
   pObj = live->objTail;
   while (pObj)
   {
-    if (pObj->type != CARTYPE_DUMMY_SCEN && pObj->z >= ZNEARPLANE && pObj->z < ZFARPLANE)
+    if (pObj->car->type != CARTYPE_DUMMY_SCEN && pObj->z >= ZNEARPLANE && pObj->z < ZFARPLANE)
     {
       fixed_t width = pObj->scale * pObj->img->width;
       fixed_t height = pObj->scale * pObj->img->height;

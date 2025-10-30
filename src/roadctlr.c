@@ -26,7 +26,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_";
+  char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
 
 
@@ -180,30 +180,59 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   }
 
 
-
-  ctlr->zCounterTraffic -= zAmt;
-  if (ctlr->zCounterTraffic < 0) {
-    roadCtlDoTrafficGeneration(ctlr, 0);
-    // ZTRAFSPACING right now is the spacing between the generator firing, and
-    // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
-    // to the far plane has elapsed
-    // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
-    ctlr->zCounterTraffic += 150 + (rand() & 255);
+/*
+  // Find most-distant car. If speed==0, we know it's a tree, sign, special object, etc
+  roadObj_t *pObj = ctlr->roadLive.objTail;
+  while (pObj && pObj->car->speed == 0) {
+    pObj = pObj->last;
   }
+  if (pObj) {
+    int distanceFromEnd = 4096 - pObj->z;
+    if (distanceFromEnd >= ctlr->zTrafficDelta) {
+      roadCtlDoTrafficGeneration(ctlr, 0);
+      // ZTRAFSPACING right now is the spacing between the generator firing, and
+      // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
+      // to the far plane has elapsed
+      // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
+      ctlr->zTrafficDelta = 1050 + (rand() & 2047);
+    }
+  }
+  else {
+    printf("MADE 1 CAR\n");
+      roadCtlDoTrafficGeneration(ctlr, 0);
+      // ZTRAFSPACING right now is the spacing between the generator firing, and
+      // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
+      // to the far plane has elapsed
+      // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
+      ctlr->zTrafficDelta = 1050 + (rand() & 2047);
+  }
+*/
+  
 
   // Put down scenery or chevrons
   ctlr->zCounterScenery -= zAmt;
   if (ctlr->zCounterScenery < 0)
   {
     char nextCmd = peekCurveAhead(ctlr);
+    char curCmd = *(ctlr->parsePos);
 
     ctlr->zCounterScenery += ZSCENSPACING;
 
+    // There's a specific priority here, where the upcoming curve
+    // gets priority over signs describing the current curve
     if (nextCmd == 'L' || nextCmd == 'h')
     {
         roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
     }
     else if (nextCmd == 'R' || nextCmd == 'H')
+    {
+        roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
+    }
+    else if (curCmd == 'L' || curCmd == 'h') 
+    {
+        roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
+    }
+    else if (curCmd == 'R' || curCmd == 'H') 
     {
         roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
     }
@@ -218,6 +247,8 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
   }
   
+
+
   // Scroll horizon based on speed and turn sharpness
   live->xHorizon += xScrollAmount;
 
@@ -343,6 +374,7 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
     return 0;
   
   car = ctlr->cars + i;
+  car->roadObj.car = car;   // Make sure we can get back to ourself easily
 
   // TODO: Texnum for cars can be transformed into texNum*3, for texNum + offset, where offset
   // is 0=left-angled, 1=centered, 2=right-angled

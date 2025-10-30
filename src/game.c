@@ -135,7 +135,7 @@ void doCurvePhysics(gameState_t *state)
   fixed_t speed = plrCar->car.speed;
   fixed_t amount;
 
-  amount = (getCurveAmount(live) * (FIXTOI(speed))) / 10000;
+  amount = (getCurveAmount(live) * (FIXTOI(speed))) / 8000; //10000;
   
   // Push car outward according to curves
   if (amount)
@@ -247,7 +247,7 @@ void checkObjCollisions(gameState_t *state)
     if (obj->z > ZNEARPLANE) // List is sorted by z
       break;
 
-    if (obj->type != CARTYPE_DUMMY_SCEN) 
+    if (obj->car->type != CARTYPE_DUMMY_SCEN) 
     {
       if (obj->sx >= 0 && obj->sx < 160 && !state->plrCar.skidding)
       {

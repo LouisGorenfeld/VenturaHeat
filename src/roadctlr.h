@@ -75,7 +75,7 @@ typedef struct roadCtlr_t
   int carActive[MAXCARS];
 
   short zCounterScenery; // Z until next scenery generation
-  short zCounterTraffic; // Z until next traffic generation
+  short zTrafficDelta;   // Z until next traffic generation
 
 } roadCtlr_t;
 

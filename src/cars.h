@@ -36,7 +36,7 @@ typedef enum carType_t
   CARTYPE_CHECKPOINT,   // Overhead
   CARTYPE_CHECKPOINT_L, // Left post
   CARTYPE_CHECKPOINT_R  // Right post
-} carType_t;
+} carType_t;  
 
 typedef struct car_t
 {
@@ -44,6 +44,7 @@ typedef struct car_t
   fixed_t speed;  // MPH, same units as the player's speed
   fixed_t damage[NUMCARLOC];
   int texNum;      // TODO: Robust system with multiple sprites per car
+  car_t *car; // The pre-allocated car_t 
 
   roadObj_t roadObj;
 } car_t;

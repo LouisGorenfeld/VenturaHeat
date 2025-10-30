@@ -31,7 +31,6 @@ void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type, int te
   car->speed = speed;
   car->roadObj.x = x;
   car->roadObj.z = z;
-  car->roadObj.type = type;
 
   switch (type)
   {
@@ -78,28 +77,28 @@ void initGears(gearDef_t *gears)
   g->speedMax = 80;
   g->accelGood = fromMphPerSec(25);
   g->accelSweet = fromMphPerSec(30);
-  g->accelBad = fromMphPerSec(10);
+  g->accelBad = fromMphPerSec(15);
   g++;
   
   g->speedMin = 30;
   g->speedMax = 165;
   g->accelGood = fromMphPerSec(19);
   g->accelSweet = fromMphPerSec(28);
-  g->accelBad = fromMphPerSec(8);
+  g->accelBad = fromMphPerSec(15);
   g++;
 
   g->speedMin = 80;
   g->speedMax = 220;
   g->accelGood = fromMphPerSec(18);
   g->accelSweet = fromMphPerSec(27);
-  g->accelBad = fromMphPerSec(6);
+  g->accelBad = fromMphPerSec(15);
   g++;
 
   g->speedMin = 130;
-  g->speedMax = 280;
+  g->speedMax = 340;
   g->accelGood = fromMphPerSec(17);
   g->accelSweet = fromMphPerSec(25);
-  g->accelBad = fromMphPerSec(4);
+  g->accelBad = fromMphPerSec(8);
   g++;
 }
 

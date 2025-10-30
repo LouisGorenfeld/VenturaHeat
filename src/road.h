@@ -25,14 +25,15 @@
 // NEARPLANE should approximately be the closest line's z value
 #define ZNEARPLANE 40
 
+typedef struct car_t car_t;
 
 // Road object for the display list system
 // An enemy/car/etc definition allocated elsewhere *has* a roadObj
 typedef struct roadObj_t roadObj_t;
 struct roadObj_t
 {  
-  // Controller fills these out, including choosing the right img for anim
-  int type;
+  car_t *car;   // The pre-allocated car object that this is linked to 
+
   pcxImage_t *img;
   fixed_t x;
   int z;    // 0-4096 units of the ZMap (also see ZFARCULL and ZNEARCULL)
