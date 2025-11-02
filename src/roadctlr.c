@@ -15,8 +15,6 @@
 #define MEDHILL 500
 #define SHARPHILL 1000
 
-void roadCtlDoTrafficGeneration(roadCtlr_t *ctlr, int rank);
-
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
 
 char *parseTexChange(roadCtlr_t *ctlr, char *ch);
@@ -179,36 +177,6 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     }
   }
 
-
-/*
-  // Find most-distant car. If speed==0, we know it's a tree, sign, special object, etc
-  roadObj_t *pObj = ctlr->roadLive.objTail;
-  while (pObj && pObj->car->speed == 0) {
-    pObj = pObj->last;
-  }
-  if (pObj) {
-    int distanceFromEnd = 4096 - pObj->z;
-    if (distanceFromEnd >= ctlr->zTrafficDelta) {
-      roadCtlDoTrafficGeneration(ctlr, 0);
-      // ZTRAFSPACING right now is the spacing between the generator firing, and
-      // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
-      // to the far plane has elapsed
-      // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
-      ctlr->zTrafficDelta = 1050 + (rand() & 2047);
-    }
-  }
-  else {
-    printf("MADE 1 CAR\n");
-      roadCtlDoTrafficGeneration(ctlr, 0);
-      // ZTRAFSPACING right now is the spacing between the generator firing, and
-      // it needs to fire when the car has zCounterTraffic DISTANCE between the car in front
-      // to the far plane has elapsed
-      // We need it to be a definitive delta.. TODO: Make this incorporate ZTRAFSPACING (or rank)
-      ctlr->zTrafficDelta = 1050 + (rand() & 2047);
-  }
-*/
-  
-
   // Put down scenery or chevrons
   ctlr->zCounterScenery -= zAmt;
   if (ctlr->zCounterScenery < 0)
@@ -312,7 +280,7 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
   }
 }
 
-void roadCtlDoTrafficGeneration(roadCtlr_t *ctlr, int rank)
+void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
 {
   const fixed_t third = ITOFIX(1)/3;
   const fixed_t laneXs[] = {
@@ -322,8 +290,6 @@ void roadCtlDoTrafficGeneration(roadCtlr_t *ctlr, int rank)
   };
 
   // Make sure the farthest car's z >= minZdistance from the end
-
-
   fixed_t speed = ITOFIX(150);// ITOFIX((rank+1) * 65 + 5);
 
   // Roll one of these patterns for the 3 lanes:
@@ -397,7 +363,7 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
   // Add it to the display list
   linkRoadObj(&ctlr->roadLive, &car->roadObj);
   ctlr->carActive[i] = 1;
-  
+
   return car;
 }
 

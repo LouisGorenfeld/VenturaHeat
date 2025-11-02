@@ -93,6 +93,7 @@ void roadCtlDraw(roadCtlr_t *ctlr, unsigned char *dest);
 void roadCtlInit(roadCtlr_t *ctlr);
 // Direct set texture call
 void roadCtlSetTexture(roadCtlr_t *ctlr, texLoc_t loc, pcxImage_t *img);
+void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank);
 
 // Returns the car which has been allocated
 // texNum is only used for adding the scenery object

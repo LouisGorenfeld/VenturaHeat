@@ -229,7 +229,7 @@ void insertRoadObj(roadLive_t *live, roadObj_t *obj, roadObj_t *p, int isBefore)
 {
   assert(obj);
   assert(p);
-  fprintf(fp, "insertRoadObj: obj=%p relativeTo=%p isBefore=%d\n", obj, obj, p, isBefore);
+  fprintf(fp, "insertRoadObj: obj=%p relativeTo=%p isBefore=%d\n", obj, p, isBefore);
 
   if (isBefore)
   {
@@ -312,8 +312,7 @@ void unlinkRoadObj(roadLive_t *live, roadObj_t *obj)
     obj->next->last = obj->last;
 
   live->objCount--;
-  obj->car = NULL;
-  
+   
   checkObjIntegrity(live);
 }
 

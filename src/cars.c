@@ -95,10 +95,10 @@ void initGears(gearDef_t *gears)
   g++;
 
   g->speedMin = 130;
-  g->speedMax = 340;
+  g->speedMax = 310;
   g->accelGood = fromMphPerSec(17);
   g->accelSweet = fromMphPerSec(25);
-  g->accelBad = fromMphPerSec(8);
+  g->accelBad = fromMphPerSec(15);
   g++;
 }
 

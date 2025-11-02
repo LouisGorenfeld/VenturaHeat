@@ -223,6 +223,36 @@ void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
   }
 }
 
+void doCarGeneration(gameState_t *state) {
+
+  if (state->plrCar.car.speed < ITOFIX(150))
+    return;
+
+    // Find most-distant car. If speed==0, we know it's a tree, sign, special object, etc
+  roadCtlr_t *ctlr = &state->roadCtlr;
+  roadObj_t *pObj = ctlr->roadLive.objTail;
+  while (pObj && pObj->car && pObj->car->speed == 0) {
+    pObj = pObj->last;
+  }
+
+  int genTraffic = 0;
+  if (pObj) {
+    int distanceFromEnd = ZFARPLANE - pObj->z;
+    if (distanceFromEnd >= ctlr->zTrafficDelta) {
+      genTraffic = 1;
+    }
+  }
+  else {  // No moving cars found on playfield; generate one
+      genTraffic = 1;
+  }
+
+  if (genTraffic) {
+    // TODO: Scale density by rank
+    ctlr->zTrafficDelta = 1024 + (rand() & 511);
+    roadCtlrAddRandomizedCar(ctlr, 0);
+  }
+}
+
 int isPlrOffroad(gameState_t *state)
 {
   roadLive_t *live = &state->roadCtlr.roadLive;
@@ -336,6 +366,8 @@ void doGameLogic(gameState_t *state)
   state->roadCtlr.roadLive.xBack = -state->plrCtrls.wheel >> 1;
   state->roadCtlr.roadLive.xFront = plrCar->car.roadObj.x >> 4;
   state->roadCtlr.roadLive.xHorizon = state->plrCtrls.wheel << 16;
+
+  doCarGeneration(state);
 
   if (state->timeLeft > 0)
     state->timeLeft--;
