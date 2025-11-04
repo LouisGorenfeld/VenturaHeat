@@ -87,19 +87,27 @@ void initGears(gearDef_t *gears)
   g->accelBad = fromMphPerSec(15);
   g++;
 
-  g->speedMin = 80;
-  g->speedMax = 220;
+  g->speedMin = 60;
+  g->speedMax = 200;
   g->accelGood = fromMphPerSec(18);
   g->accelSweet = fromMphPerSec(27);
   g->accelBad = fromMphPerSec(15);
   g++;
 
-  g->speedMin = 130;
-  g->speedMax = 310;
+  g->speedMin = 120;
+  g->speedMax = 275;
   g->accelGood = fromMphPerSec(17);
   g->accelSweet = fromMphPerSec(25);
-  g->accelBad = fromMphPerSec(15);
+  g->accelBad = fromMphPerSec(14);
   g++;
+
+  g->speedMin = 175;
+  g->speedMax = 330;
+  g->accelGood = fromMphPerSec(15);
+  g->accelSweet = fromMphPerSec(20);
+  g->accelBad = fromMphPerSec(13);
+  g++;
+
 }
 
 void initPlrCar(plrCar_t *car)
@@ -108,7 +116,7 @@ void initPlrCar(plrCar_t *car)
   car->rpmsSweetHi = 8000;
   car->rpmsBadLo = 9000;
   initGears(car->gears);
-  car->numGears = 4;
+  car->numGears = 5;
 }
 
 
