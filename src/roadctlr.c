@@ -28,7 +28,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
 
 
 
-  char *realStr = "!,_,_,l,u,dr,_,l,r,L,u,d,r,_,_,ru,|,rd,_,r,R,r,_,_";
+  char *realStr = "!,_,_,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru,|,T(11)rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u,|";
 
   ctlr->stage.cmd = realStr;
   ctlr->parsePos = ctlr->stage.cmd;
@@ -284,9 +284,9 @@ void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
 {
   const fixed_t third = ITOFIX(1)/3;
   const fixed_t laneXs[] = {
-    -third,
+    -32767,
     0,
-    third
+    32767
   };
 
   // Make sure the farthest car's z >= minZdistance from the end

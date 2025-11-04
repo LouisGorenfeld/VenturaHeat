@@ -25,7 +25,7 @@ void gameInit(gameState_t *state)
   memset(state, 0, sizeof(gameState_t));
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
-  state->timeLeft = 60*70;
+  state->timeLeft = 90*70;
 
   loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
 }
