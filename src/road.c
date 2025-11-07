@@ -350,9 +350,9 @@ void drawRow(pcxImage_t *dest, roadLive_t *live,
      int sy, int rl, int rr, int zOff)
 {
       int texWidth = rr - rl;
-      blitline(dest, rr + texWidth, sy, rr, sideTex[0], (zOff>>4) % (sideTex[0]->height));
-      blitline(dest, rl, sy, rr, roadTex, (zOff>>4) % roadTex->height);
-      blitline(dest, rl - texWidth, sy, rl, sideTex[1], (zOff>>4) % (sideTex[1]->height));
+      blitline(dest, rr + texWidth, sy, rr, sideTex[0], (zOff>>3) % (sideTex[0]->height));
+      blitline(dest, rl, sy, rr, roadTex, (zOff>>3) % roadTex->height);
+      blitline(dest, rl - texWidth, sy, rl, sideTex[1], (zOff>>3) % (sideTex[1]->height));
 
       // Fill in for anything not covered by texture (based on color of first
       // pixel of the texture)

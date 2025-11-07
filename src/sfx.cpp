@@ -27,7 +27,7 @@ void tickSfx(sfxState_t *sfx) {
     // Channel 9
     if (isTriggerRequested(sfx, kSFX_Skid)) {
         ackTrigger(sfx, kSFX_Skid);
-        gRadPlayer.PlayNote(8, 2, 4, 2);
+        gRadPlayer.PlayNote(8, 2, 6, 2);
     }
     else if (isTriggerRequested(sfx, kSFX_Engine)) {
         // Do not ack; engine stays on

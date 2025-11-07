@@ -70,6 +70,10 @@ void plrBrake(gameState_t *state, unsigned char amt)
   state->plrCtrls.brake = amt;
   if (state->plrCtrls.brake > 255)
     state->plrCtrls.brake = 255;
+
+  if (amt > 127 && state->plrCar.car.speed > 0)
+    triggerSfx(&state->sfxState, kSFX_Skid);
+
 }
 
 void plrStartShiftUp(gameState_t *state)
@@ -333,12 +337,14 @@ void doGameLogic(gameState_t *state)
   {
     plrCar->car.roadObj.x += 400;
     plrCar->skidding--;
+    triggerSfx(&state->sfxState, kSFX_Skid);
   }
   else if (plrCar->skidding < 0)
   {
     plrCar->car.roadObj.x -= 400;
     plrCar->skidding++;
-  }
+    triggerSfx(&state->sfxState, kSFX_Skid);
+ }
 
   if (isPlrOffroad(state) || plrCar->car.speed == 0 /* rough idle */)
   {
@@ -353,14 +359,26 @@ void doGameLogic(gameState_t *state)
 
   checkObjCollisions(state);
 
+  fixed_t xBefore = plrCar->car.roadObj.x;
+  fixed_t amt = (state->plrCtrls.wheel * (state->plrCar.car.speed >> 8)) >> 13;
+  if (amt > MAXSTEER)
+    amt = MAXSTEER;
+  else if (amt < -MAXSTEER)
+    amt = -MAXSTEER;
+  plrCar->car.roadObj.x -= amt;
+
   doCurvePhysics(state);
-  {
-    fixed_t amt = (state->plrCtrls.wheel * (state->plrCar.car.speed >> 8)) >> 13;
-    if (amt > MAXSTEER)
-      amt = MAXSTEER;
-    else if (amt < -MAXSTEER)
-      amt = -MAXSTEER;
-    plrCar->car.roadObj.x -= amt;
+
+  // Detect whether the player is turning hard against a curve
+  if (state->plrCtrls.wheel < -64) { // Turning left, which increases x (left side is +)
+    if (plrCar->car.roadObj.x <= xBefore) {
+      triggerSfx(&state->sfxState, kSFX_Skid);
+    }
+  }
+  else if (state->plrCtrls.wheel > 64) { // Turning right, which decreases x (right side is -)
+    if (plrCar->car.roadObj.x >= xBefore) {
+      triggerSfx(&state->sfxState, kSFX_Skid);
+    }
   }
 
   state->roadCtlr.roadLive.xBack = -state->plrCtrls.wheel >> 1;
