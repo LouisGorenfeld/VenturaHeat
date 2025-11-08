@@ -43,7 +43,7 @@ typedef struct car_t
   carType_t type;
   fixed_t speed;  // MPH, same units as the player's speed
   fixed_t damage[NUMCARLOC];
-  int texNum;      // TODO: Robust system with multiple sprites per car
+  int texNum;
   car_t *car; // The pre-allocated car_t 
 
   roadObj_t roadObj;

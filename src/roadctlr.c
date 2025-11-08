@@ -26,12 +26,11 @@ void roadCtlInit(roadCtlr_t *ctlr)
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
-
-
-  char *realStr = "!,_,_,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru,|,T(11)rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u,|";
-
-  ctlr->stage.cmd = realStr;
-  ctlr->parsePos = ctlr->stage.cmd;
+  ctlr->stage[0].cmd = "_,_,l,r,_,ur,d,l,_,_,r,dr,u,l,_,_,_,_";
+  ctlr->stage[1].cmd = "U,D,T(02),_,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru"; 
+  ctlr->stage[2].cmd = "T(11)rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u";
+  
+  ctlr->parsePos = ctlr->stage[0].cmd;
 
   roadInit(&ctlr->roadDef, &ctlr->roadLive);
 
@@ -64,6 +63,15 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   return ch;
 }
 
+void loadNextStage(roadCtlr_t *ctlr) 
+{
+  if (ctlr->curStage < MAX_STAGES - 1) {
+    ctlr->curStage++;
+  }
+  ctlr->parsePos = ctlr->stage[ctlr->curStage].cmd;
+  // TODO: background? :)
+}
+
 void parseCommand(roadCtlr_t *ctlr)
 {
   char *ch = ctlr->parsePos;
@@ -72,7 +80,7 @@ void parseCommand(roadCtlr_t *ctlr)
   live->ddxFront = live->ddxSeg;
   live->ddyFront = live->ddySeg;
 
-
+  // Execute command delineated by commas
   while (*ch != 0)
   {
     switch (*ch)
@@ -92,16 +100,6 @@ void parseCommand(roadCtlr_t *ctlr)
                  break;
       case 'T':  ch = parseTexChange(ctlr, ch);
                  break;
-      case '|':  
-      /* Not working yet
-                roadCtlAddCar(ctlr, FTOFIX(-1.2), 4000, 0, CARTYPE_CHECKPOINT, -1);
-                roadCtlAddCar(ctlr, FTOFIX(1.2), 4000, 0, CARTYPE_CHECKPOINT_L, -1);
-                roadCtlAddCar(ctlr, FTOFIX(1.2), 4000, 0, CARTYPE_CHECKPOINT_R, -1);
-                */
-                break;                 
-      case 0:
-        printf("End of road\n"); while(1);
-        exit(9);  // End of the road
     }
 
     ch++;
@@ -110,10 +108,17 @@ void parseCommand(roadCtlr_t *ctlr)
       ch++;
       break;
     }
+    else if (*ch == 0)
+    {
+      // TODO: Time extend callback into gamestate
+      loadNextStage(ctlr);
+      ch = ctlr->parsePos;
+    }
   }
 
   ctlr->parsePos = ch;
 }
+
 
 
 // Return the curve command if there is one in the next command.
@@ -290,7 +295,7 @@ void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
   };
 
   // Make sure the farthest car's z >= minZdistance from the end
-  fixed_t speed = ITOFIX(150);// ITOFIX((rank+1) * 65 + 5);
+  fixed_t speed = ITOFIX(175);// ITOFIX((rank+1) * 65 + 5);
 
   // Roll one of these patterns for the 3 lanes:
   // 1 2 3
@@ -299,15 +304,18 @@ void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
   //     -
   // -   - <-- staggered
     int pattern = rand() & 3;
+    int texNum = (rand() & 1)? 1 : 4;
+    car_t *car;
+    speed += ITOFIX(rand() & 31);
     if (pattern == 3) {
         fixed_t z = ZFARPLANE-1;
-        roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE, -1);
-        roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE, -1);
+        car = roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE, texNum);
+        car =roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE, texNum);
 //      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
     else {
         const int lane = pattern;      
-        roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, -1);
+        car =roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, texNum);
 //      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
     }
 

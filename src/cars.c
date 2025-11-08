@@ -32,30 +32,36 @@ void initCar(car_t *car, fixed_t x, int z, fixed_t speed, carType_t type, int te
   car->roadObj.x = x;
   car->roadObj.z = z;
 
-  switch (type)
-  {
-    case CARTYPE_COUPE:
-      car->texNum = 1;
-      break;
+  // Default values per type
+  if (texNum == -1) {
+    switch (type)
+    {
+      case CARTYPE_COUPE:
+        car->texNum = 1;
+        break;
 
-    case CARTYPE_TREE:
-      car->texNum = 2;
-      break;
+      case CARTYPE_TREE:
+        car->texNum = 2;
+        break;
 
-    case CARTYPE_LCHEV:
-      car->texNum = 0;
-      break;
+      case CARTYPE_LCHEV:
+        car->texNum = 0;
+        break;
 
-    case CARTYPE_RCHEV:
-      car->texNum = 0;
-      break;
+      case CARTYPE_RCHEV:
+        car->texNum = 0;
+        break;
 
-    case CARTYPE_DUMMY_SCEN:
-      car->texNum = texNum;
-      break;
+      case CARTYPE_DUMMY_SCEN:
+        car->texNum = texNum;
+        break;
 
-    default:
-      assert(0);
+      default:
+        assert(0);
+    }
+  }
+  else {
+    car->texNum = texNum;
   }
 }
 

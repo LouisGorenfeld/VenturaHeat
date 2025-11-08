@@ -56,6 +56,7 @@ Prior to moving the z position where it cuves
 #define SHARPHILL 2500
 */
 
+#define MAX_STAGES 6
 
 typedef struct roadStage_t
 {
@@ -69,7 +70,8 @@ typedef struct roadCtlr_t
 
   roadDef_t roadDef;
   roadLive_t roadLive;
-  roadStage_t stage; // TODO: Only one stage for now
+  roadStage_t stage[MAX_STAGES];
+  int curStage; // TODO: Maybe this goes into gamestate
 
   car_t cars[MAXCARS];
   int carActive[MAXCARS];
