@@ -39,6 +39,10 @@ typedef struct gameState_t
   fixed_t hoodDuck;
   sfxState_t sfxState;
 
+  char *msg;
+  int msgCountdown;
+  int msgBlinkMask;
+
 } gameState_t;
 
 

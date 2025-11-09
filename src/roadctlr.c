@@ -26,9 +26,11 @@ void roadCtlInit(roadCtlr_t *ctlr)
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
-  ctlr->stage[0].cmd = "_,_,l,r,_,ur,d,l,_,_,r,dr,u,l,_,_,_,_";
-  ctlr->stage[1].cmd = "U,D,T(02),_,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru"; 
-  ctlr->stage[2].cmd = "T(11)rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u";
+  ctlr->stage[0].cmd = "_,_,l,r,_,ur,d,_,l,u,d,r,dr,u,l,_,_,_,U";
+  ctlr->stage[1].cmd = "_,T(02),D,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru,_,u,d"; 
+  ctlr->stage[2].cmd = "_,T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u";
+  ctlr->stage[3].cmd = "_,T(01),T(00),T(20)l,l,uL,dL,L,R,u,l,d,_,L,h,_,l,R,uR,ul,D,Dr,DR,r,_,_";
+  ctlr->stage[4].cmd = "_,T(02),T(12),H,h,_,u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,D,Dr,DR,r,_,_";
   
   ctlr->parsePos = ctlr->stage[0].cmd;
 
@@ -63,19 +65,21 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   return ch;
 }
 
-void loadNextStage(roadCtlr_t *ctlr) 
+char *loadNextStage(roadCtlr_t *ctlr) 
 {
   if (ctlr->curStage < MAX_STAGES - 1) {
     ctlr->curStage++;
   }
-  ctlr->parsePos = ctlr->stage[ctlr->curStage].cmd;
+//  ctlr->parsePos = ctlr->stage[ctlr->curStage].cmd;
   // TODO: background? :)
+  return ctlr->stage[ctlr->curStage].cmd;
 }
 
-void parseCommand(roadCtlr_t *ctlr)
+int parseCommand(roadCtlr_t *ctlr)
 {
   char *ch = ctlr->parsePos;
   roadLive_t *live = &ctlr->roadLive;
+  int nextStageLoaded = 0;
 
   live->ddxFront = live->ddxSeg;
   live->ddyFront = live->ddySeg;
@@ -110,13 +114,13 @@ void parseCommand(roadCtlr_t *ctlr)
     }
     else if (*ch == 0)
     {
-      // TODO: Time extend callback into gamestate
-      loadNextStage(ctlr);
-      ch = ctlr->parsePos;
+      ch = loadNextStage(ctlr);
+      nextStageLoaded = 1;
     }
   }
 
   ctlr->parsePos = ch;
+  return nextStageLoaded;
 }
 
 
@@ -148,9 +152,10 @@ char peekCurveAhead(roadCtlr_t *ctlr)
   return 0;
 }
 
-void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
+int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 {
   int i;
+  int nextStageLoaded = 0;
   roadLive_t *live = &ctlr->roadLive;
   fixed_t xScrollAmount = (getCurveAmount(live) * (fixed_t)zAmt) << 0;
   fixed_t yScrollAmount = -(getHillAmount(live) * (fixed_t)zAmt) >> 3;
@@ -164,8 +169,12 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   if (live->segPos >= ZMAPLEN<<16)
   {
     live->segPos -= ZMAPLEN<<16;
-    parseCommand(ctlr);
+    nextStageLoaded = parseCommand(ctlr);
   }
+
+  
+
+
 
 
 
@@ -176,9 +185,6 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     {
       car_t *car = ctlr->cars + i;
       car->roadObj.z -= zAmt;
-// Duplicate culling!
-//      if (car->roadObj.z <= ZNEARCULL || car->roadObj.z >= ZFARCULL)
-//        roadCtlRemoveCar(ctrl, car);
     }
   }
 
@@ -237,6 +243,8 @@ void roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     if (live->yOffsetHorizon < yOffsetDest)
        live->yOffsetHorizon = yOffsetDest;
   }  
+
+  return nextStageLoaded;
 }
 
 void roadCtlSetTexture(roadCtlr_t *ctrl, texLoc_t loc, pcxImage_t *img)

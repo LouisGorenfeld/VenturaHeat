@@ -5,6 +5,7 @@ typedef enum sfxNum_t {
     kSFX_Engine = 0,
     kSFX_Crash,
     kSFX_Skid,
+    kSFX_Extend,
     kNumSFX
 } sfxNum_t;
 

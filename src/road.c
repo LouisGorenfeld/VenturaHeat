@@ -482,7 +482,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
       pObj = pObj->next;
     }
 
-    if (z >= ZFARPLANE)
+    if (z >= 6000)  // This looks good; it's a little farther than the ZFARPLANE
       break;
 
     // Finding texture y coordinate:

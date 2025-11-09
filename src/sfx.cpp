@@ -39,6 +39,10 @@ void tickSfx(sfxState_t *sfx) {
         ackTrigger(sfx, kSFX_Crash);
         gRadPlayer.PlayNote(7, 1, 3, 3);
     }
+    else if (isTriggerRequested(sfx, kSFX_Extend)) {
+        ackTrigger(sfx, kSFX_Extend);
+        gRadPlayer.PlayNote(7, 1, 4, 0x1B);
+    }
 
     sfx->lastTriggerState = sfx->triggerState;
 }

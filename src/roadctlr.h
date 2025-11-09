@@ -88,8 +88,8 @@ typedef enum texLoc_t
   TEXLOC_RIGHT
 } texLoc_t;
 
-// Positive scrolls towards camera
-void roadCtlScroll(roadCtlr_t *ctlr, short zAmt);
+// Positive scrolls towards camera. Returns true if next stage has been loaded
+int roadCtlScroll(roadCtlr_t *ctlr, short zAmt);
 void roadCtlCarLogic(roadCtlr_t *ctlr);
 void roadCtlDraw(roadCtlr_t *ctlr, unsigned char *dest);
 void roadCtlInit(roadCtlr_t *ctlr);

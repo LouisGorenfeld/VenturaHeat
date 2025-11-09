@@ -10,6 +10,7 @@
 
 extern pcxFont_t gFontTiny;
 extern pcxFont_t gFontDigi;
+extern pcxFont_t gFontMedium;
 
 
 extern char gKeyDown[128];
@@ -18,6 +19,9 @@ extern char gKeyDown[128];
 #define MAXSTEER 256
 #define SPEEDLOSS FTOFIX(.25) // speed is multiplied against this in a crash; 16.16 fixed point
 
+#define TIMESTART 75*70
+#define TIMEBONUS 60*70
+
 pcxImage_t gCarHoodImg;
 
 void gameInit(gameState_t *state)
@@ -25,7 +29,7 @@ void gameInit(gameState_t *state)
   memset(state, 0, sizeof(gameState_t));
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
-  state->timeLeft = 90*70;
+  state->timeLeft = TIMESTART;
 
   loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
 }
@@ -318,7 +322,16 @@ void doGameLogic(gameState_t *state)
   if (plrCar->car.speed > 0 && zScroll == 0)
     zScroll = 1;  // Don't let the lack of precision make the car inert
     
-  roadCtlScroll(&state->roadCtlr, zScroll);
+  int nextStageLoaded = roadCtlScroll(&state->roadCtlr, zScroll);
+  if (nextStageLoaded) {
+    triggerSfx(&state->sfxState, kSFX_Extend);
+    state->msg = "TIME EXTENDED";
+    state->msgBlinkMask = 1;
+    state->msgCountdown = 70*2;
+    state->timeLeft += TIMEBONUS;
+    if (state->timeLeft > TIMESTART)
+      state->timeLeft = TIMESTART;
+  }
   roadCtlCarLogic(&state->roadCtlr);
 
   doGearBox(&state->plrCar, &state->plrCtrls);
@@ -391,6 +404,9 @@ void doGameLogic(gameState_t *state)
     state->timeLeft--;
 
   tickSfx(&state->sfxState);
+
+  if (state->msgCountdown > 0)
+    state->msgCountdown--;
 }
 
 void drawCrosshair(gameState_t *state, pcxImage_t *buf, int cx, int cy)
@@ -488,6 +504,9 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );
+  if (state->msg && state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
+    blitFont(&gFontMedium, buf->pixels, state->msg, 160 - (strlen(state->msg)>>1), 70);
+  }
   drawHud(state, buf);
 
 

@@ -31,6 +31,7 @@ _go32_dpmi_seginfo gOldKB, gNewKB;
 
 FILE *gLogFP = 0;
 
+pcxFont_t gFontTiny, gFontDigi, gFontMedium;
 
 char gKeyDown[128];
 
@@ -260,8 +261,6 @@ void loadRAD() {
   gRadPlayer.Init(data, NULL);
 }
 
-pcxFont_t gFontTiny, gFontDigi;
-
 void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
 {
   char str[128];
@@ -281,7 +280,7 @@ int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
- pcxImage_t fontImg, fontDigiImg, tachImg, tex1;
+ pcxImage_t fontImg, fontDigiImg, fontMediumImg, tachImg, tex1;
  pcxImage_t dblBuf;
  atexit(cleanup);
 
@@ -312,6 +311,9 @@ loadRAD();
 
  loadPCXFile(&fontImg, "data/font4x5.pcx");
  initFont(&fontImg, &gFontTiny, 0, 4, 5);
+
+ loadPCXFile(&fontMediumImg, "data/f10x10.pcx");
+ initFont(&fontMediumImg, &gFontMedium, 0, 10, 10);
 
  loadPCXFile(&fontDigiImg, "data/diginums.pcx");
  loadPCXFile(&tachImg, "data/digitach.pcx");
