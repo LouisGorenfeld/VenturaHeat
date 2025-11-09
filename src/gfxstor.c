@@ -5,6 +5,7 @@
 
 #include <string.h>
 #include "gfxstor.h"
+#include "data.h"
 
 typedef struct gfxStore_t
 {
@@ -24,40 +25,40 @@ void loadGfxInternal(gfxStore_t *stor)
 
 
   // Road Textures
-  loadPCXFile(stor->roadTex + 0, "data/roadtex3.pcx");
-  loadPCXFile(stor->roadTex + 1, "data/iceroad.pcx");
+  loadPCX(stor->roadTex + 0, data_roadtex3);
+  loadPCX(stor->roadTex + 1, data_iceroad);
 
 
 
   // Side Textures
-  loadPCXFile(stor->sideTex + 0, "data/grastex1.pcx");
-  loadPCXFile(stor->sideTex + 1, "data/snowtex1.pcx");
-  loadPCXFile(stor->sideTex + 2, "data/beactex1.pcx");
+  loadPCX(stor->sideTex + 0, data_grastex1);
+  loadPCX(stor->sideTex + 1, data_snowtex1);
+  loadPCX(stor->sideTex + 2, data_beactex1);
 
 
 
   // Car (road object) Images
   cg = stor->carGfx + 0;
-  loadPCXFile(&cg->images[CARGFX_LEFT],  "data/lchev.pcx");
-  loadPCXFile(&cg->images[CARGFX_RIGHT], "data/rchev.pcx");
+  loadPCX(&cg->images[CARGFX_LEFT],  data_lchev);
+  loadPCX(&cg->images[CARGFX_RIGHT], data_rchev);
 
   cg = stor->carGfx + 1;
-  loadPCXFile(&cg->images[CARGFX_CENTER], "data/coupe1.pcx");
+  loadPCX(&cg->images[CARGFX_CENTER], data_coupe1);
 
   cg = stor->carGfx + 2;
-  loadPCXFile(&cg->images[CARGFX_CENTER], "data/tree.pcx");
+  loadPCX(&cg->images[CARGFX_CENTER], data_tree);
 
-  cg = stor->carGfx + 3;
-  loadPCXFile(&cg->images[CARGFX_LEFT],  "data/lcheckp.pcx");
-  loadPCXFile(&cg->images[CARGFX_RIGHT], "data/rcheckp.pcx");
-  loadPCXFile(&cg->images[CARGFX_RIGHT], "data/checkp.pcx");
+//  cg = stor->carGfx + 3;
+//  loadPCX(&cg->images[CARGFX_LEFT],  "data_lcheckp.pcx");
+//  loadPCX(&cg->images[CARGFX_RIGHT], "data_rcheckp.pcx");
+//  loadPCX(&cg->images[CARGFX_RIGHT], data_checkp.pcx");
 
   cg = stor->carGfx + 4;
-  loadPCXFile(&cg->images[CARGFX_CENTER], "data/coupe2.pcx");
+  loadPCX(&cg->images[CARGFX_CENTER], data_coupe2);
 
 
   // Horizon Textures
-  loadPCXFile(stor->horizonTex + 0, "data/horicity.pcx");
+  loadPCX(stor->horizonTex + 0, data_horicity);
 }
 
 void loadGfx()

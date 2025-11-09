@@ -7,6 +7,7 @@
 #include "roadctlr.h"
 #include "cars.h"
 #include "math.h"
+#include "data.h"
 
 extern pcxFont_t gFontTiny;
 extern pcxFont_t gFontDigi;
@@ -31,7 +32,11 @@ void gameInit(gameState_t *state)
   initPlrCar(&state->plrCar);
   state->timeLeft = TIMESTART;
 
-  loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
+//  printf("carhood %c\n", *data_carhood);
+//printf("data_roadtex3 = %p (size = %zu)\n", data_carhood, sizeof(data_carhood));
+//while(1);
+//  loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
+  loadPCX(&gCarHoodImg, data_carhood);
 }
 
 void plrSteer(gameState_t *state, char amt)

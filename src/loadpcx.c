@@ -25,11 +25,15 @@ void loadPCX(pcxImage_t *img, unsigned char *data)
 
    	memset(img, 0, sizeof(pcxImage_t));
    
-	if (*p++ != 0x0A)	// Manufacturer
+	if (*p++ != 0x0A)	{ // Manufacturer 
+    printf("bad Manufacturer\n"); while(1);
 		return;
+  }
 	p++;			// Skip version number
-	if (*p++ != 0x01)	// Encoding
+	if (*p++ != 0x01)	{ // Encoding
+    printf("bad Encoding\n"); while(1);
 		return;
+  }
 
 	bitsPerPixel = *p++;
     pixelsPerByte = 8 / bitsPerPixel;

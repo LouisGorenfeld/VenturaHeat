@@ -14,6 +14,7 @@
 #include "road.h"
 #include "game.h"
 #include "draw.h"
+#include "data.h"
 
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
@@ -240,7 +241,7 @@ int sbPort()
   return strtol(c, NULL, 16);
 }
 
-void loadRAD() {
+void loadRADFile() {
   FILE *fp = fopen("data/main.rad", "rb");
   char *data;
   long size = -1;
@@ -259,6 +260,10 @@ void loadRAD() {
   fclose(fp);
 
   gRadPlayer.Init(data, NULL);
+}
+
+void loadRAD() {
+  gRadPlayer.Init(data_main, NULL);
 }
 
 void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
@@ -301,7 +306,7 @@ gLogFP = fopen("log.txt", "w");
 
 
  // TODO: Don't set palette here-- this load is only to get the pal :)
- loadPCXFile(&tex1, "data/roadtex2.pcx");
+ loadPCX(&tex1, data_roadtex2);
  setPal(tex1.pal);
  
 loadRAD();
@@ -309,14 +314,14 @@ loadRAD();
  loadGfx();
  gameInit(&gameState);
 
- loadPCXFile(&fontImg, "data/font4x5.pcx");
+ loadPCX(&fontImg, data_font4x5);
  initFont(&fontImg, &gFontTiny, 0, 4, 5);
 
- loadPCXFile(&fontMediumImg, "data/f10x10.pcx");
+ loadPCX(&fontMediumImg, data_f10x10);
  initFont(&fontMediumImg, &gFontMedium, 0, 10, 10);
 
- loadPCXFile(&fontDigiImg, "data/diginums.pcx");
- loadPCXFile(&tachImg, "data/digitach.pcx");
+ loadPCX(&fontDigiImg, data_diginums);
+ loadPCX(&tachImg, data_digitach);
 
  startTimer(70);
 

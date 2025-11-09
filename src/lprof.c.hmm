@@ -1,0 +1,25 @@
+#define MAX_FUNCS 256
+
+typedef profframe_t {
+    const char* name;
+    int ticks;
+} profframe_t;
+
+typedef profentry_t {
+}
+
+const char *framelog[MAX_FUNCS];
+int framelogTop = -1;
+
+//
+void lprof_addTag(const char *name) {
+    framelog[++framelogTop] = name;
+}
+
+void lprof_frame() {
+}
+
+void lprof_report() {
+
+}
+
