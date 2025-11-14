@@ -12,7 +12,7 @@
 extern pcxFont_t gFontTiny;
 extern pcxFont_t gFontDigi;
 extern pcxFont_t gFontMedium;
-
+extern int gLastFPS;
 
 extern char gKeyDown[128];
 
@@ -423,22 +423,6 @@ void drawCrosshair(gameState_t *state, pcxImage_t *buf, int cx, int cy)
 }
 
 
-void drawHud(gameState_t *state, pcxImage_t *buf)
-{
-  // TODO: Fixed pt
-  static const float r = 15.0f;
-  static const float kMaxRPMs = OVERRPMS + 4000;
-  static const float angleRange =  6.28;
-  static const float x0 = 320 - 75;
-  static const float y0 = 200 - 25;
-  float angle = ((float)state->plrCar.rpms / kMaxRPMs) * (angleRange);
-  angle -= 3.14;
-  
-//  drawLine(buf, x0, y0, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 15);
-//  drawLine(buf, x0+1, y0+1, x0 + r*cos(6.28 - angle), y0 + r*sin(angle), 7);
-}
-
-extern int gTicks;
 extern int gLastFPS;
 void drawDebug(gameState_t *state, pcxImage_t *buf)
 {
@@ -452,6 +436,8 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
   buf->pixels[32+(state->plrCtrls.wheel>>2)] = 15;
 //  buf[320+32+(state->plrCar.car.facing>>16)] = 15;
 /*
+
+/*
   sprintf(dbgline, "segPos=%d   speed=%d   gear=%d  z=%d    x=%d   rL=%d   rR=%d",
                    state->roadCtlr.roadLive.segPos>>16,
                    state->plrCar.car.speed>>16,
@@ -460,6 +446,7 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
                    state->plrCar.car.roadObj.x,
                    rl, rr
   );*/
+
   sprintf(dbgline, "FPS: %d", gLastFPS);
   blitFont(&gFontTiny, buf->pixels, dbgline, 8, 8);
 
@@ -512,10 +499,6 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
   if (state->msg && state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
     blitFont(&gFontMedium, buf->pixels, state->msg, 160 - (strlen(state->msg)>>1), 70);
   }
-  drawHud(state, buf);
-
-
-//  drawDebug(state, buf);
 }
 
 
