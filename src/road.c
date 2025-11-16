@@ -48,7 +48,7 @@ void calcZMap()
 
 void roadInit(roadDef_t *def, roadLive_t *live)
 {
-  fp = fopen("roadobj.log", "w");
+//  fp = fopen("roadobj.log", "w");
 
   memset(def, 0, sizeof(def));
   memset(live, 0, sizeof(live));
@@ -127,6 +127,9 @@ void blitline(pcxImage_t *dest, int destxL, int desty, int destxR,
 
 void dumpRoad(roadLive_t *live) 
 {
+  if (!fp)
+    return;
+
   roadObj_t *obj =  live->objHead;
   while (obj = obj->next) 
   {
@@ -138,7 +141,8 @@ void dumpRoad(roadLive_t *live)
 void roadCrash(roadLive_t *live, char *str)
 {
   printf("FATAL: roadObj integrity: %s", str);  
-  fprintf(fp, "FATAL: roadObj integrity: %s\n", str);
+  if (fp)
+    fprintf(fp, "FATAL: roadObj integrity: %s\n", str);
   dumpRoad(live);
   fflush(fp);
   fclose(fp);
@@ -148,7 +152,8 @@ void roadCrash(roadLive_t *live, char *str)
 
 void roadWarn(roadLive_t *live, char *str)
 {
-  fprintf(fp, "WARNING: roadObj integrity: %s\n", str);  
+  if (fp)
+    fprintf(fp, "WARNING: roadObj integrity: %s\n", str);  
   dumpRoad(live);
 }
 
@@ -229,7 +234,8 @@ void insertRoadObj(roadLive_t *live, roadObj_t *obj, roadObj_t *p, int isBefore)
 {
   assert(obj);
   assert(p);
-  fprintf(fp, "insertRoadObj: obj=%p relativeTo=%p isBefore=%d\n", obj, p, isBefore);
+  if (fp)
+    fprintf(fp, "insertRoadObj: obj=%p relativeTo=%p isBefore=%d\n", obj, p, isBefore);
 
   if (isBefore)
   {
@@ -260,7 +266,8 @@ void insertRoadObj(roadLive_t *live, roadObj_t *obj, roadObj_t *p, int isBefore)
 
 void linkRoadObj(roadLive_t *live, roadObj_t *obj)
 {
-  fprintf(fp, "linkRoadObj: obj=%p\n", obj);
+  if (fp)
+    fprintf(fp, "linkRoadObj: obj=%p\n", obj);
   if (!live->objHead)
   {
     live->objHead = obj;
@@ -298,7 +305,8 @@ void linkRoadObj(roadLive_t *live, roadObj_t *obj)
 // leaves you with a tail but no head
 void unlinkRoadObj(roadLive_t *live, roadObj_t *obj)
 {
-  fprintf(fp, "unlinkRoadObj: obj=%p\n", obj);
+  if (fp)
+    fprintf(fp, "unlinkRoadObj: obj=%p\n", obj);
 
   // When there are two cars, first obj->next is 0 and
   if (live->objHead == obj)

@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
  pcxImage_t dblBuf;
  atexit(cleanup);
 
-gLogFP = fopen("log.txt", "w");
+//gLogFP = fopen("log.txt", "w");
 
  setMode(0x13);
 
@@ -381,7 +381,7 @@ loadRAD();
 }
 
  
-fclose(gLogFP);
+//fclose(gLogFP);
 
  return 0;
 }

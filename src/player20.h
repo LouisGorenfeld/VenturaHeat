@@ -13,7 +13,7 @@ typedef unsigned short uint16_t;
 typedef char int8_t;
 typedef unsigned char uint8_t;
 
-        extern FILE *gLogFP;
+//        extern FILE *gLogFP;
 
 extern int ADLIB;
 //extern int gAdlibCommands;

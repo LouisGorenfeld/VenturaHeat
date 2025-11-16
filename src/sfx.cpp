@@ -11,12 +11,16 @@ int isTriggerRequested(sfxState_t *sfx, sfxNum_t num) {
 
 void ackTrigger(sfxState_t *sfx, sfxNum_t num) {
     sfx->triggerState &= ~(1<<num);
-    fprintf(gLogFP, "ackTrigger: %d 0x%x\n", num, sfx->triggerState);
+    
+    if (gLogFP)
+        fprintf(gLogFP, "ackTrigger: %d 0x%x\n", num, sfx->triggerState);
 }
 
 void triggerSfx(sfxState_t *sfx, sfxNum_t num) {
     sfx->triggerState |= (1<<num);
-    fprintf(gLogFP, "triggerSfx: %d 0x%x\n", num, sfx->triggerState);
+    
+    if (gLogFP)
+        fprintf(gLogFP, "triggerSfx: %d 0x%x\n", num, sfx->triggerState);
 }
 
 void setSfxFrequency(sfxState_t *sfx, sfxNum_t num, int freq) {
