@@ -16,6 +16,12 @@
 #include "draw.h"
 #include "data.h"
 
+
+typedef enum screen_t {
+  SCREEN_TITLE,
+  SCREEN_GAME 
+} screen_t;
+
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
 int gQuitNow = 0;
@@ -23,6 +29,9 @@ int gFPS = 0;
 int gTicks = 0;
 int gLastFPS = 0;
 int gFrameskip = 1;
+
+unsigned char *gTitlePal;
+unsigned char *gGamePal;
 
 RADPlayer gRadPlayer;
 volatile int gTimerCounter = 0;
@@ -32,7 +41,9 @@ _go32_dpmi_seginfo gOldKB, gNewKB;
 
 FILE *gLogFP = 0;
 
+pcxImage_t gTitleImg;
 pcxFont_t gFontTiny, gFontDigi, gFontMedium;
+screen_t gScreen = SCREEN_TITLE;
 
 char gKeyDown[128];
 
@@ -280,13 +291,36 @@ void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
   }
 }
 
+void menuToGame()
+{
+  gScreen = SCREEN_GAME;
+  setPal(gGamePal);
+}
+
+void doMenuLogic()
+{
+  if (gKeyDown[0x48]) 
+    menuToGame();
+}
+
+void showTitle(pcxImage_t *dblBuf)
+{
+  setPal(gTitlePal);
+  blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
+  blitFont(&gFontTiny, dblBuf->pixels, "PRE-ALPHA TEST NOVEMBER 2025", 0, 0);
+  blitFont(&gFontMedium, dblBuf->pixels, "PRESS ACCELERATOR TO START", 0, 170);
+  blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
+}
+
 
 int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
- pcxImage_t fontImg, fontDigiImg, fontMediumImg, tachImg, tex1;
+ pcxImage_t fontImg, fontDigiImg, fontMediumImg, 
+            tachImg, tex1;
  pcxImage_t dblBuf;
+
  atexit(cleanup);
 
 //gLogFP = fopen("log.txt", "w");
@@ -294,7 +328,6 @@ int main(int argc, char *argv[])
  setMode(0x13);
 
  startKeyboard();
-
 
  dblBuf.height = 200;
  dblBuf.width = 320;
@@ -305,11 +338,8 @@ int main(int argc, char *argv[])
    dblBuf.lines[i] = dblBuf.pixels + dblBuf.width*i;
 
 
- // TODO: Don't set palette here-- this load is only to get the pal :)
- loadPCX(&tex1, data_roadtex2);
- setPal(tex1.pal);
  
-loadRAD();
+ loadRAD();
 
  loadGfx();
  gameInit(&gameState);
@@ -323,22 +353,40 @@ loadRAD();
  loadPCX(&fontDigiImg, data_diginums);
  loadPCX(&tachImg, data_digitach);
 
+ loadPCX(&gTitleImg, data_vhlogo);
+
+ loadPCX(&tex1, data_roadtex2);   // harvest palette
+ gGamePal = tex1.pal;
+ gTitlePal = gTitleImg.pal;
+
  startTimer(70);
 
  // Start engine!
  triggerSfx(&gameState.sfxState, kSFX_Engine);
  gRadPlayer.SetSpeed(5);
 
+ showTitle(&dblBuf);
+
  while (!gQuitNow)
  {
 
   if (!gFrameskip) {
-    doGameLogic(&gameState); 
-    doGameDraw(&gameState, &dblBuf);
+    if (gScreen == SCREEN_GAME) {
+      doGameLogic(&gameState); 
+      doGameDraw(&gameState, &dblBuf);
+    }
+    else {
+      doMenuLogic();
+    }
   }
   while (gTimerCounter > 0) {
     if (gFrameskip) {
-      doGameLogic(&gameState); 
+      if (gScreen == SCREEN_GAME) {
+        doGameLogic(&gameState);
+      }
+      else {
+        doMenuLogic();
+      }
     }
     if (++gTicks >= 70*2)
     {
@@ -351,33 +399,31 @@ loadRAD();
   }
 
   gFPS++;
-  doGameDraw(&gameState, &dblBuf);
+  if (gScreen == SCREEN_GAME)
+   doGameDraw(&gameState, &dblBuf);
 
 
-  drawSquare(&dblBuf, 0, 0, 320, 32, 0);
+  if (gScreen == SCREEN_GAME) {
+    drawSquare(&dblBuf, 0, 0, 320, 32, 0);
+    int cx = (float)tachImg.width * (float)gameState.plrCar.rpms / (float)OVERRPMS;
+    if (cx) {
+      blitPCXClip(&tachImg, &dblBuf, 24*4, 8, 0, 0, cx, tachImg.height);
+    }
 
-  // Draw tach
-  int cx = (float)tachImg.width * (float)gameState.plrCar.rpms / (float)OVERRPMS;
-  if (cx) {
-    blitPCXClip(&tachImg, &dblBuf, 24*4, 8, 0, 0, cx, tachImg.height);
+    // TODO: We really might want to make a compatible font ..
+    drawDigiNum(&dblBuf, &fontDigiImg, FIXTOI(gameState.plrCar.car.speed), 0, 4);
+    drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
+    drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
+
+    char dbgline[128];
+    sprintf(dbgline, "FPS: %d", gLastFPS);
+    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
+
   }
-//  printf("--%d--\n", cx);while(1);
-
-//  blitFont(&gFontDigi, dblBuf.pixels, "ABC", 0, 0);
-//    blitPCX(&fontDigiImg, &dblBuf, 0, 0);
-  // TODO: We really might want to make a compatible font ..
-  drawDigiNum(&dblBuf, &fontDigiImg, FIXTOI(gameState.plrCar.car.speed), 0, 4);
-  drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
-  drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
-
-  char dbgline[128];
-  sprintf(dbgline, "FPS: %d", gLastFPS);
-  blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
 
   waitVsync();
   flip(&dblBuf);
   doInput();
- 
 }
 
  
