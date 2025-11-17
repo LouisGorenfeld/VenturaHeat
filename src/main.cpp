@@ -291,8 +291,12 @@ void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
   }
 }
 
+void fadeOutPal(unsigned char pal[]);
+void fadeInPal(unsigned char pal[]);
+
 void menuToGame()
 {
+  fadeOutPal(gTitlePal);
   gScreen = SCREEN_GAME;
   setPal(gGamePal);
 }
@@ -303,10 +307,47 @@ void doMenuLogic()
     menuToGame();
 }
 
+void fadeInPal(unsigned char pal[]) 
+{
+  int i = 256;
+  for (int j=256; j >= 0; j--) {
+    unsigned char p[768];
+    for (int i=0; i < 768; i++) {
+      int x = pal[i] - j;
+      if (x < 0)
+        x = 0;
+      p[i] = x;
+    }
+    setPal(p);
+    waitVsync();
+  }
+}
+
+void fadeOutPal(unsigned char pal[]) 
+{
+  int i = 256;
+  for (int j=0; j < 256; j+=4) {
+    unsigned char p[768];
+    for (int i=0; i < 768; i++) {
+      int x = pal[i] - j;
+      if (x < 0)
+        x = 0;
+      p[i] = x;
+    }
+    setPal(p);
+    waitVsync();
+  }
+}
+
+
 void showTitle(pcxImage_t *dblBuf)
 {
-  setPal(gTitlePal);
+  gScreen = SCREEN_TITLE;
+  drawSquare(dblBuf, 0, 0, 0, 0, 0);
+//  setPal(gTitlePal);
   blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
+  flip(dblBuf);
+  fadeInPal(gTitlePal);
   blitFont(&gFontTiny, dblBuf->pixels, "PRE-ALPHA TEST NOVEMBER 2025", 0, 0);
   blitFont(&gFontMedium, dblBuf->pixels, "PRESS ACCELERATOR TO START", 0, 170);
   blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
@@ -364,6 +405,7 @@ int main(int argc, char *argv[])
  // Start engine!
  triggerSfx(&gameState.sfxState, kSFX_Engine);
  gRadPlayer.SetSpeed(5);
+
 
  showTitle(&dblBuf);
 

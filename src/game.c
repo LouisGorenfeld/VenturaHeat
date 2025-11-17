@@ -31,6 +31,7 @@ void gameInit(gameState_t *state)
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
   state->timeLeft = TIMESTART;
+  state->gameOverCountdown = -1;
 
 //  printf("carhood %c\n", *data_carhood);
 //printf("data_roadtex3 = %p (size = %zu)\n", data_carhood, sizeof(data_carhood));
@@ -260,8 +261,18 @@ void doCarGeneration(gameState_t *state) {
   }
 
   if (genTraffic) {
-    // TODO: Scale density by rank
-    ctlr->zTrafficDelta = 1024 + (rand() & 511);
+    if (state->roadCtlr.curStage == 0) {
+      ctlr->zTrafficDelta = 2048 + (rand() & 1023);
+    }
+    else if (state->roadCtlr.curStage == 1) {
+      ctlr->zTrafficDelta = 2048 + (rand() & 511);
+    }
+    else if (state->roadCtlr.curStage == 3) {
+      ctlr->zTrafficDelta = 512 + (rand() & 511);
+    }
+    else {
+      ctlr->zTrafficDelta = 1024 + (rand() & 511);
+    }
     roadCtlrAddRandomizedCar(ctlr, 0);
   }
 }
@@ -277,7 +288,7 @@ int isPlrOffroad(gameState_t *state)
 
 void checkObjCollisions(gameState_t *state)
 {
-  const int kSkidAmount = 70;
+  const int kSkidAmount = 20;
 
   // TODO: Handle being bumped from behind (if other car's speed is greater,
   // then it's from behind). Iterate through car list to find corresponding
@@ -312,11 +323,16 @@ void checkObjCollisions(gameState_t *state)
   }
 }
 
-
 void doGameLogic(gameState_t *state)
 {
   int zScroll;
   plrCar_t *plrCar = &state->plrCar;
+
+  if (state->gameOverCountdown > 0) {
+    state->gameOverCountdown--;
+    return;
+  }
+
   doGameInputs(state);
 
   // TODO: There are still some lack-of-precision issues here, so perhaps
@@ -405,8 +421,15 @@ void doGameLogic(gameState_t *state)
 
   doCarGeneration(state);
 
-  if (state->timeLeft > 0)
+  if (state->timeLeft > 0) {
     state->timeLeft--;
+  }
+  else if (state->timeLeft == 0) {
+    state->msg = "GAME OVER";
+    state->msgBlinkMask = 0;
+    state->msgCountdown = 70*3;
+    state->gameOverCountdown = state->msgCountdown;
+  }
 
   tickSfx(&state->sfxState);
 
@@ -489,15 +512,22 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
 //  drawSquare(buf, 160-32, 120, 160+32, 120+48, 0);
 }
 
+void showTitle(pcxImage_t*);
 void doGameDraw(gameState_t *state, pcxImage_t *buf)
 {
+  if (state->gameOverCountdown == 0) {
+    showTitle(buf);
+    return;
+  }
+
   //  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
   roadDraw(&state->roadCtlr.roadLive, buf, 0);
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );
   if (state->msg && state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
-    blitFont(&gFontMedium, buf->pixels, state->msg, 160 - (strlen(state->msg)>>1), 70);
+    int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
+    blitFont(&gFontMedium, buf->pixels, state->msg, x, 70);
   }
 }
 

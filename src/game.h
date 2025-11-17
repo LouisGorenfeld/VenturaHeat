@@ -43,6 +43,8 @@ typedef struct gameState_t
   int msgCountdown;
   int msgBlinkMask;
 
+  int gameOverCountdown;
+
 } gameState_t;
 
 

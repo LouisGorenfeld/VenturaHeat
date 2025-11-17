@@ -56,7 +56,7 @@ Prior to moving the z position where it cuves
 #define SHARPHILL 2500
 */
 
-#define MAX_STAGES 6
+#define MAX_STAGES 7
 
 typedef struct roadStage_t
 {

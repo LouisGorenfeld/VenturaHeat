@@ -12,7 +12,7 @@
 #define MEDCURVE 9000 //11000
 #define SHARPCURVE 12000
 #define LIGHTHILL 100
-#define MEDHILL 500
+#define MEDHILL 300
 #define SHARPHILL 1000
 
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
@@ -26,11 +26,15 @@ void roadCtlInit(roadCtlr_t *ctlr)
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
-  ctlr->stage[0].cmd = "_,_,l,r,_,ur,d,_,l,u,d,r,dr,u,l,_,_,_,U";
-  ctlr->stage[1].cmd = "_,T(02),D,l,u,dr,_,_,l,r,L,u,d,r,_,_,ru,_,u,d"; 
-  ctlr->stage[2].cmd = "_,T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,r,LT(10),T(02),l,uR,Dr,u";
-  ctlr->stage[3].cmd = "_,T(01),T(00),T(20)l,l,uL,dL,L,R,u,l,d,_,L,h,_,l,R,uR,ul,D,Dr,DR,r,_,_";
-  ctlr->stage[4].cmd = "_,T(02),T(12),H,h,_,u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,D,Dr,DR,r,_,_";
+  ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_";
+  ctlr->stage[1].cmd = "T(21),l,r,_,ur,d,_,l,u,d,r,_,dr,u,d,l,_,_,U,D";
+  ctlr->stage[2].cmd = "T(02),d,l,u,dr,_,_,l,r,L,u,d,r,_,ru,u,_,_"; 
+
+  ctlr->stage[3].cmd = "T(02)T(11)T(20),_,_,_,_,u,_,l,_,d,_,_,_,_,l,r,_,_,_,_,";
+
+  ctlr->stage[4].cmd = "T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,H,LT(10),T(02),l,uR,Ur,D";
+  ctlr->stage[5].cmd = "T(01),T(00),T(20)l,l,uL,dL,L,R,u,l,d,_,L,h,_,l,R,uR,ul,D,Dr,UR,ur,d,_";
+  ctlr->stage[6].cmd = "T(02),T(12),H,h,_,u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,D,Dr,DR,r,_,_";
   
   ctlr->parsePos = ctlr->stage[0].cmd;
 
