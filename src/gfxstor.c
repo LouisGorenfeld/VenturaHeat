@@ -27,6 +27,7 @@ void loadGfxInternal(gfxStore_t *stor)
   // Road Textures
   loadPCX(stor->roadTex + 0, data_roadtex3);
   loadPCX(stor->roadTex + 1, data_iceroad);
+  loadPCX(stor->roadTex + 2, data_chektex);
 
 
 
@@ -34,6 +35,8 @@ void loadGfxInternal(gfxStore_t *stor)
   loadPCX(stor->sideTex + 0, data_grastex1);
   loadPCX(stor->sideTex + 1, data_snowtex1);
   loadPCX(stor->sideTex + 2, data_beactex1);
+  loadPCX(stor->sideTex + 3, data_beactex2);
+  loadPCX(stor->sideTex + 4, data_mudtex1);
 
 
 

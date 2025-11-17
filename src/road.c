@@ -366,9 +366,9 @@ void drawRow(pcxImage_t *dest, roadLive_t *live,
       // pixel of the texture)
       if (rr + texWidth < dest->width - 1)
 //        hline(dest, rr + texWidth, sy, dest->width - 1, 96+12);
-        hline(dest, rr + texWidth, sy, dest->width - 1, 1);
+        hline(dest, rr + texWidth, sy, dest->width - 1, sideTex[0]->pixels[0]);
       if (rl - texWidth > 0)
-        hline(dest, 0, sy, rl - texWidth, 76);
+        hline(dest, 0, sy, rl - texWidth, sideTex[1]->pixels[0]);
 }
 
 // Dampen curves in the foreground and exaggerate them in the distance

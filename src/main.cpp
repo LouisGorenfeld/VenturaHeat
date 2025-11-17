@@ -47,6 +47,11 @@ screen_t gScreen = SCREEN_TITLE;
 
 char gKeyDown[128];
 
+void clearImage(pcxImage_t*);
+void fadeOutPal(unsigned char pal[]);
+void fadeInPal(unsigned char pal[]);
+void blankPal();
+
 void handleTimer()
 {
   gRadPlayer.Update();
@@ -291,8 +296,11 @@ void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
   }
 }
 
-void fadeOutPal(unsigned char pal[]);
-void fadeInPal(unsigned char pal[]);
+void blankPal() {
+  unsigned char pal[768];
+  memset(pal, 0, 768);
+  setPal(pal);    
+}
 
 void menuToGame()
 {
@@ -307,9 +315,28 @@ void doMenuLogic()
     menuToGame();
 }
 
+/*
+void shiftInPal(unsigned char pal[])
+{
+  for (int j=0; j < 256; j+=4) {
+    unsigned char p[768];
+    for (int i=0; i < 256; i++) {
+      int x = i-j;
+      if (x < 0)
+        x = 0;
+      p[i] = pal[x];
+    }
+    setPal(p);
+    waitVsync();
+  }
+
+}
+*/
+
+
+
 void fadeInPal(unsigned char pal[]) 
 {
-  int i = 256;
   for (int j=256; j >= 0; j--) {
     unsigned char p[768];
     for (int i=0; i < 768; i++) {
@@ -325,7 +352,6 @@ void fadeInPal(unsigned char pal[])
 
 void fadeOutPal(unsigned char pal[]) 
 {
-  int i = 256;
   for (int j=0; j < 256; j+=4) {
     unsigned char p[768];
     for (int i=0; i < 768; i++) {
@@ -343,8 +369,9 @@ void fadeOutPal(unsigned char pal[])
 void showTitle(pcxImage_t *dblBuf)
 {
   gScreen = SCREEN_TITLE;
-  drawSquare(dblBuf, 0, 0, 0, 0, 0);
+  clearImage(dblBuf);
 //  setPal(gTitlePal);
+  blankPal();
   blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
   flip(dblBuf);
   fadeInPal(gTitlePal);
@@ -353,6 +380,10 @@ void showTitle(pcxImage_t *dblBuf)
   blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
 }
 
+void clearImage(pcxImage_t *p)
+{
+  memset(p->pixels, 0, p->height*p->width);
+}
 
 int main(int argc, char *argv[])
 {
@@ -373,7 +404,6 @@ int main(int argc, char *argv[])
  dblBuf.height = 200;
  dblBuf.width = 320;
  dblBuf.pixels = (unsigned char*)malloc(dblBuf.height*dblBuf.width);
- memset(dblBuf.pixels, 0, dblBuf.height*dblBuf.width);
  dblBuf.lines = (unsigned char**)malloc(sizeof(unsigned char*) * dblBuf.height);
  for (i=0; i < dblBuf.height; i++)
    dblBuf.lines[i] = dblBuf.pixels + dblBuf.width*i;
@@ -445,6 +475,8 @@ int main(int argc, char *argv[])
    doGameDraw(&gameState, &dblBuf);
 
 
+   
+  // Draw the HUD
   if (gScreen == SCREEN_GAME) {
     drawSquare(&dblBuf, 0, 0, 320, 32, 0);
     int cx = (float)tachImg.width * (float)gameState.plrCar.rpms / (float)OVERRPMS;

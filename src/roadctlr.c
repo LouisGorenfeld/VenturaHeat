@@ -8,9 +8,9 @@
 #define ZSCENSPACING (ZFARPLANE/10)
 #define ZTRAFSPACING (ZFARPLANE)
 
-#define LIGHTCURVE 6000 //7000
-#define MEDCURVE 9000 //11000
-#define SHARPCURVE 12000
+#define LIGHTCURVE 5000 //7000
+#define MEDCURVE 8000 //11000
+#define SHARPCURVE 10000
 #define LIGHTHILL 100
 #define MEDHILL 300
 #define SHARPHILL 1000
@@ -21,20 +21,37 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch);
 
 void roadCtlInit(roadCtlr_t *ctlr)
 {
+  /* REFERENCE:
+    // Road Textures
+  loadPCX(stor->roadTex + 0, data_roadtex3);
+  loadPCX(stor->roadTex + 1, data_iceroad);
+  loadPCX(stor->roadTex + 2, data_chektex);
+
+
+
+  // Side Textures
+  loadPCX(stor->sideTex + 0, data_grastex1);
+  loadPCX(stor->sideTex + 1, data_snowtex1);
+  loadPCX(stor->sideTex + 2, data_beactex1);
+  loadPCX(stor->sideTex + 3, data_beactex2);
+  loadPCX(stor->sideTex + 4, data_mudtex1);
+
+
+*/
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
-  ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_";
+  ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
   ctlr->stage[1].cmd = "T(21),l,r,_,ur,d,_,l,u,d,r,_,dr,u,d,l,_,_,U,D";
-  ctlr->stage[2].cmd = "T(02),d,l,u,dr,_,_,l,r,L,u,d,r,_,ru,u,_,_"; 
+  ctlr->stage[2].cmd = "T(02),d,l,u,dr,u,d,_,l,r,L,L,u,d,r,R,ru,u,_,_,_"; 
 
-  ctlr->stage[3].cmd = "T(02)T(11)T(20),_,_,_,_,u,_,l,_,d,_,_,_,_,l,r,_,_,_,_,";
+  ctlr->stage[3].cmd = "T(03),T(23),_,_,_,u,_,l,_,d,_,_,_,_,l,r,_,_,_";
 
   ctlr->stage[4].cmd = "T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,H,LT(10),T(02),l,uR,Ur,D";
-  ctlr->stage[5].cmd = "T(01),T(00),T(20)l,l,uL,dL,L,R,u,l,d,_,L,h,_,l,R,uR,ul,D,Dr,UR,ur,d,_";
-  ctlr->stage[6].cmd = "T(02),T(12),H,h,_,u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,D,Dr,DR,r,_,_";
+  ctlr->stage[5].cmd = "T(04),T(00),T(24)l,l,uL,dL,L,R,u,l,d,_,L,h,U,l,R,uR,ul,_,_";
+  ctlr->stage[6].cmd = "T(02),T(11),H,h,T(24),u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,T(12)";
   
   ctlr->parsePos = ctlr->stage[0].cmd;
 

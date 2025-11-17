@@ -40,8 +40,11 @@ typedef struct gameState_t
   sfxState_t sfxState;
 
   char *msg;
+  char *msg2;
   int msgCountdown;
   int msgBlinkMask;
+  int laptime;
+  int crashes;
 
   int gameOverCountdown;
 

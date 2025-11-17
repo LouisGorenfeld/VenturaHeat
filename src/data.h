@@ -23,6 +23,9 @@ extern unsigned char data_snowtex1[];
 extern unsigned char data_chektex[];
 extern unsigned char data_tree[];
 extern unsigned char data_vhlogo[];
+extern unsigned char data_beactex2[];
+extern unsigned char data_mudtex1[];
+
 //data_dither.c
 //data_rcheckp.c
 //data_scaleme.c
