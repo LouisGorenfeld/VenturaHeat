@@ -423,10 +423,10 @@ void doGameLogic(gameState_t *state)
 
   if (state->timeLeft > 0) {
     state->timeLeft--;
-    if (state->timeLeft == 10) {
+    if (state->timeLeft == 10*70) {
       state->msg = "TIME IS RUNNING OUT";
       state->msgCountdown = 70*2;
-      state->msgBlinkMask = 3;
+      state->msgBlinkMask = 1;
     }
   }
   else if (state->timeLeft == 0) {
