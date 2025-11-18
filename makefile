@@ -3,7 +3,7 @@
 CC = i586-pc-msdosdjgpp-g++ -march=i486 -mtune=i486
 CFLAGS_DBG = -O0 -g
 CFLAGS_PROF = -pg -g -O3
-CFLAGS_PROD = -Os
+CFLAGS_PROD = -O2 -funroll-loops
 CFLAGS = -fpermissive
 
 SRC_DIR = src

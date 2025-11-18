@@ -49,15 +49,17 @@ void loadGfxInternal(gfxStore_t *stor)
   loadPCX(&cg->images[CARGFX_CENTER], data_coupe1);
 
   cg = stor->carGfx + 2;
-  loadPCX(&cg->images[CARGFX_CENTER], data_tree);
+  loadPCX(&cg->images[CARGFX_CENTER], data_baretree);
 
-//  cg = stor->carGfx + 3;
-//  loadPCX(&cg->images[CARGFX_LEFT],  "data_lcheckp.pcx");
-//  loadPCX(&cg->images[CARGFX_RIGHT], "data_rcheckp.pcx");
-//  loadPCX(&cg->images[CARGFX_RIGHT], data_checkp.pcx");
+  cg = stor->carGfx + 3;
+  loadPCX(&cg->images[CARGFX_CENTER], data_bush);
 
   cg = stor->carGfx + 4;
   loadPCX(&cg->images[CARGFX_CENTER], data_coupe2);
+
+  cg = stor->carGfx + 5;
+  loadPCX(&cg->images[CARGFX_CENTER], data_cactus);
+
 
 
   // Horizon Textures

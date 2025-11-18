@@ -238,11 +238,20 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     }
     else
     {
-      // Randomized trees
-      if (rand() & 1)
-        roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, -1);
+      // Randomized scenery
+      int gfxIndex;
+      if (ctlr->curStage == 1)
+        gfxIndex = 3;
+      else if (ctlr->curStage == 2) 
+        gfxIndex = rand() & 1 ? 3: 5;
       else
-        roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, -1);
+        gfxIndex = rand() & 1? 2 : 3;
+
+        
+      if (rand() & 1)
+        roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+      else
+        roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
     }
 
   }
