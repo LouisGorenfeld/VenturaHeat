@@ -47,6 +47,7 @@ typedef struct gameState_t
   int crashes;
 
   int gameOverCountdown;
+  int crossedFinish;
 
 } gameState_t;
 

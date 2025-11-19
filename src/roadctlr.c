@@ -51,9 +51,11 @@ void roadCtlInit(roadCtlr_t *ctlr)
 
   ctlr->stage[4].cmd = "T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,H,LT(10),T(02),l,uR,Ur,D";
   ctlr->stage[5].cmd = "T(04),T(00),T(24)l,l,uL,dL,L,R,u,l,d,_,L,h,U,l,R,uR,ul,_,_";
-  ctlr->stage[6].cmd = "T(02),T(11),H,h,T(24),u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,T(12)";
-  
-  ctlr->parsePos = ctlr->stage[0].cmd;
+  ctlr->stage[6].cmd = "T(02),T(11),H,h,T(24),u,d,r,Ru,rd,H,_,L,lU,D,l,R,uR,ul,T(12)_";
+//  ctlr->stage[6].cmd = "_,_,T(12)_"; // for testing finish line
+
+  ctlr->curStage = 0;
+  ctlr->parsePos = ctlr->stage[ctlr->curStage].cmd;
 
   roadInit(&ctlr->roadDef, &ctlr->roadLive);
 
@@ -61,6 +63,13 @@ void roadCtlInit(roadCtlr_t *ctlr)
   roadCtlSetTexture(ctlr, TEXLOC_LEFT, getSideTex(0));
   roadCtlSetTexture(ctlr, TEXLOC_RIGHT, getSideTex(0));
 
+  ctlr->scenIndex1[0] = 2;  // Left side
+  ctlr->scenIndex2[0] = 3;
+  ctlr->scenIndex1[1] = -1; // No randomized features on road yet
+  ctlr->scenIndex2[1] = -1;
+  ctlr->scenIndex1[2] = 2;  // Right side
+  ctlr->scenIndex2[2] = 3;
+  
   // TODO: Hack for now. Horizon location will change anyway
   ctlr->roadDef.horizonTex = getHorizonTex(0);
   ctlr->roadLive.yOffsetHorizon = ITOFIX(ctlr->roadDef.horizonTex->height >> 2);
@@ -74,7 +83,8 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   assert(*ch == '(');
   ch++;
   assert(*ch >= '0' && *ch <= '9');
-  side = *ch - '0' - 1;
+  side = *ch - '0' - 1; // -1, 0, 1 as roadCtlAddCar expects
+  // TODO, maybe just use 0 1 2 for everything?
   ch++;
   assert(*ch >= '0' && *ch <= '9');
   tex = *ch - '0';
@@ -82,6 +92,43 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
   assert(*ch == ')');
 
   roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN, tex);
+
+  // Switch scenery over immediately, based on texture number:
+  // 0 = grass
+  // 1 = ice
+  // 2 = beach
+  // 3 = sand
+  // 4 = mud
+  if (tex == 0) {
+    // Bushes and bare tree    
+    ctlr->scenIndex1[side + 1] = 2;
+    ctlr->scenIndex2[side + 1] = 3;
+  }
+  else if (tex == 1) {
+    // Bare tree
+    ctlr->scenIndex1[side + 1] = 2;
+    ctlr->scenIndex2[side + 1] = 2;
+  }
+  else if (tex == 2) {
+    // No beach scenery
+    ctlr->scenIndex1[side + 1] = -1;
+    ctlr->scenIndex2[side + 1] = -1;
+  }
+  else if (tex == 3) {
+    // Cactus and bushes
+    ctlr->scenIndex1[side + 1] = 5;
+    ctlr->scenIndex2[side + 1] = 3;
+  }
+  else if (tex == 4) {
+    // Only bushes
+    ctlr->scenIndex1[side + 1] = 3;
+    ctlr->scenIndex2[side + 1] = 3;
+  }
+  else {
+    ctlr->scenIndex1[side + 1] = -1;
+    ctlr->scenIndex2[side + 1] = -1;
+  }
+  
 
   return ch;
 }
@@ -182,7 +229,7 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   fixed_t yScrollAmount = -(getHillAmount(live) * (fixed_t)zAmt) >> 3;
   fixed_t yOffsetDest = -getHillAmount(live) << 8;
 
-  yOffsetDest = 0; // TODO: Maybe we want to use this again
+//  yOffsetDest = 0; // TODO: Maybe we want to use this again
 
   live->texOff =(live->texOff + zAmt) & ((1<<ZMAPBITS)-1);
   live->z += zAmt;
@@ -239,21 +286,16 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     else
     {
       // Randomized scenery
-      int gfxIndex;
-      if (ctlr->curStage == 1)
-        gfxIndex = 3;
-      else if (ctlr->curStage == 2) 
-        gfxIndex = rand() & 1 ? 3: 5;
-      else
-        gfxIndex = rand() & 1? 2 : 3;
+      int sideSlot = rand() & 1? 0 : 2;  // TODO: occasional something on road? We only do sides rn
+      int gfxIndex = rand() & 1? ctlr->scenIndex1[sideSlot] : ctlr->scenIndex2[sideSlot];
 
-        
-      if (rand() & 1)
-        roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
-      else
-        roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+      if (gfxIndex >= 0) {
+        if (sideSlot == 0)
+          roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+        else if (sideSlot == 2)
+          roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+      }
     }
-
   }
   
 

@@ -489,9 +489,9 @@ int main(int argc, char *argv[])
     drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
     drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
 
-    char dbgline[128];
-    sprintf(dbgline, "FPS: %d", gLastFPS);
-    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
+//    char dbgline[128];
+//    sprintf(dbgline, "FPS: %d", gLastFPS);
+//    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
 
   }
 

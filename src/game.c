@@ -325,7 +325,9 @@ void checkObjCollisions(gameState_t *state)
 
 void doGameLogic(gameState_t *state)
 {
-  int zScroll;
+  if (state->crossedFinish)
+    return;
+
   plrCar_t *plrCar = &state->plrCar;
 
   if (state->gameOverCountdown > 0) {
@@ -339,19 +341,24 @@ void doGameLogic(gameState_t *state)
   // keep speed in MPH fixed point and save the rightshift
 
 //  plrCar->car.speed = 30; // dbg
-  zScroll = SPEEDTOZ(plrCar->car.speed);
+  int zScroll = SPEEDTOZ(plrCar->car.speed);
   if (plrCar->car.speed > 0 && zScroll == 0)
     zScroll = 1;  // Don't let the lack of precision make the car inert
     
   int nextStageLoaded = roadCtlScroll(&state->roadCtlr, zScroll);
   if (nextStageLoaded) {
-    triggerSfx(&state->sfxState, kSFX_Extend);
-    state->msg = "TIME EXTENDED";
-    state->msgBlinkMask = 1;
-    state->msgCountdown = 70*2;
-    state->timeLeft += TIMEBONUS;
-    if (state->timeLeft > TIMESTART)
-      state->timeLeft = TIMESTART;
+    if(state->roadCtlr.curStage == MAX_STAGES - 1) {
+      state->crossedFinish = 1;
+    }
+    else {
+      triggerSfx(&state->sfxState, kSFX_Extend);
+      state->msg = "TIME EXTENDED";
+      state->msgBlinkMask = 1;
+      state->msgCountdown = 70*2;
+      state->timeLeft += TIMEBONUS;
+      if (state->timeLeft > TIMESTART)
+        state->timeLeft = TIMESTART;
+    }
   }
   roadCtlCarLogic(&state->roadCtlr);
 

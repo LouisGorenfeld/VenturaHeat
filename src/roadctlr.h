@@ -79,6 +79,9 @@ typedef struct roadCtlr_t
   short zCounterScenery; // Z until next scenery generation
   short zTrafficDelta;   // Z until next traffic generation
 
+  int scenIndex1[3];  // Scenery images to use for randomly generated scenery
+  int scenIndex2[3];  // Index is left, road, right
+
 } roadCtlr_t;
 
 typedef enum texLoc_t
