@@ -71,8 +71,8 @@ typedef struct roadCtlr_t
   roadDef_t roadDef;
   roadLive_t roadLive;
   roadStage_t stage[MAX_STAGES];
-  int curStage; // TODO: Maybe this goes into gamestate
-
+  int curStage;
+  
   car_t cars[MAXCARS];
   int carActive[MAXCARS];
 

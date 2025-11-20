@@ -365,6 +365,64 @@ void fadeOutPal(unsigned char pal[])
   }
 }
 
+void fadePalToWhite(unsigned char pal[]) 
+{
+  for (int j=0; j < 256; j+=4) {
+    unsigned char p[768];
+    for (int i=0; i < 768; i++) {
+      int x = pal[i] + j;
+      if (x > 255)
+        x = 255;
+      p[i] = x;
+    }
+    setPal(p);
+    waitVsync();
+  }
+}
+
+void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
+{
+  fadePalToWhite(gGamePal);
+  unsigned char p[768];
+  memset(p, 255, 768);
+  clearImage(dblBuf);
+  
+  p[15*3] = 0;
+  p[15*3 + 1] = 0;
+  p[15*3 + 2] = 0;
+  setPal(p);
+
+  int y=50;
+  char *thanks = "THANK YOU FOR PLAYING";
+  blitFont(&gFontMedium, dblBuf->pixels, thanks, (320-(gFontMedium.fontWidth*strlen(thanks)))>>1, y);
+
+  y += gFontMedium.fontHeight * 2;
+  char results[128];
+
+  flip(dblBuf);
+  for (int i=0; i < 2*70; i++) waitVsync();
+
+  for (int i=0; i < MAX_STAGES; i++) {
+    int time = state->laptimes[i];
+    float fTime = (float)time / 70.0f;
+    sprintf(results, "LAP %d - %.02f SEC", i, fTime);
+    blitFont(&gFontTiny, dblBuf->pixels, results, (320-(gFontTiny.fontWidth*strlen(results)))>>1, y);
+    y += gFontTiny.fontHeight + 2;
+    flip(dblBuf);
+    for (int j=0; j < 45; j++) waitVsync();
+  }
+
+  for (int j=0; j < 70; j++) waitVsync();
+  y += 5;
+  sprintf(results, "TOTAL TIME: %f SEC", (float)state->totaltime / 70.0f);
+  blitFont(&gFontTiny, dblBuf->pixels, results, (320-(gFontTiny.fontWidth*strlen(results)))>>1, y);
+
+  flip(dblBuf);
+  for (int i=0; i < 7*70; i++)
+    waitVsync();
+
+  fadeOutPal(p);
+}
 
 void showTitle(pcxImage_t *dblBuf)
 {
@@ -439,7 +497,7 @@ int main(int argc, char *argv[])
 
  showTitle(&dblBuf);
 
- while (!gQuitNow)
+ while (!gQuitNow && !gameState.crossedFinish)
  {
 
   if (!gFrameskip) {
@@ -499,6 +557,12 @@ int main(int argc, char *argv[])
   flip(&dblBuf);
   doInput();
 }
+
+killSfx(&gameState.sfxState);
+if (gameState.crossedFinish)
+  showRaceOver(&dblBuf, &gameState);
+else  // ESC
+  fadeOutPal(gGamePal);
 
  
 //fclose(gLogFP);

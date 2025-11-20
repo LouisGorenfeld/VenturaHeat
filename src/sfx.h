@@ -21,5 +21,6 @@ void setSfxFrequency(sfxState_t *sfx, sfxNum_t num, int freq);
 
 void tickSfx(sfxState_t *sfx);
 
+void killSfx(sfxState_t *sfx);
 
 #endif

@@ -27,6 +27,12 @@ void setSfxFrequency(sfxState_t *sfx, sfxNum_t num, int freq) {
   gRadPlayer.SetFrequencyDirect(8, freq);
 }
 
+void killSfx(sfxState_t *sfx) {
+  sfx->triggerState = 0;
+  gRadPlayer.PlayNote(7, 15, 0, 0);
+  gRadPlayer.PlayNote(8, 15, 0, 0);
+}
+
 void tickSfx(sfxState_t *sfx) {
     // Channel 9
     if (isTriggerRequested(sfx, kSFX_Skid)) {

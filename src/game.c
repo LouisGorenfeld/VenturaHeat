@@ -340,6 +340,10 @@ void doGameLogic(gameState_t *state)
   // TODO: There are still some lack-of-precision issues here, so perhaps
   // keep speed in MPH fixed point and save the rightshift
 
+
+  state->curLaptime++;
+  state->totaltime++;
+
 //  plrCar->car.speed = 30; // dbg
   int zScroll = SPEEDTOZ(plrCar->car.speed);
   if (plrCar->car.speed > 0 && zScroll == 0)
@@ -347,8 +351,12 @@ void doGameLogic(gameState_t *state)
     
   int nextStageLoaded = roadCtlScroll(&state->roadCtlr, zScroll);
   if (nextStageLoaded) {
-    if(state->roadCtlr.curStage == MAX_STAGES - 1) {
+    state->laptimes[state->roadCtlr.curStage - 1] = state->curLaptime;
+    state->curLaptime = 0;
+
+    if(state->roadCtlr.curStage == MAX_STAGES) {
       state->crossedFinish = 1;
+      return; // Early return and don't call us back
     }
     else {
       triggerSfx(&state->sfxState, kSFX_Extend);
@@ -430,7 +438,7 @@ void doGameLogic(gameState_t *state)
 
   if (state->timeLeft > 0) {
     state->timeLeft--;
-    if (state->timeLeft == 10) {
+    if (state->timeLeft == 10*70) {
       state->msg = "TIME IS RUNNING OUT";
       state->msgCountdown = 70*2;
       state->msgBlinkMask = 3;

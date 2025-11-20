@@ -43,7 +43,10 @@ typedef struct gameState_t
   char *msg2;
   int msgCountdown;
   int msgBlinkMask;
-  int laptime;
+  
+  int laptimes[MAX_STAGES];
+  int curLaptime;
+  int totaltime;
   int crashes;
 
   int gameOverCountdown;

@@ -135,12 +135,11 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
 
 char *loadNextStage(roadCtlr_t *ctlr) 
 {
-  if (ctlr->curStage < MAX_STAGES - 1) {
-    ctlr->curStage++;
-  }
-//  ctlr->parsePos = ctlr->stage[ctlr->curStage].cmd;
-  // TODO: background? :)
-  return ctlr->stage[ctlr->curStage].cmd;
+  ctlr->curStage++;
+  if (ctlr->curStage < MAX_STAGES)
+    return ctlr->stage[ctlr->curStage].cmd;
+  else  // Loop last stage
+    return ctlr->stage[MAX_STAGES-1].cmd;
 }
 
 int parseCommand(roadCtlr_t *ctlr)
