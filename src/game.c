@@ -536,7 +536,7 @@ void showTitle(pcxImage_t*);
 void doGameDraw(gameState_t *state, pcxImage_t *buf)
 {
   if (state->gameOverCountdown == 0) {
-    showTitle(buf);
+//    showTitle(buf);
     return;
   }
 

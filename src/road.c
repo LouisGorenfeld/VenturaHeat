@@ -646,7 +646,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     pObj = pObj->last;
   }
 
-  drawRadar(live, dest); 
+//  drawRadar(live, dest); 
 }
 
 // TODO: Interpolate between speeds so they don't transition too jarringly

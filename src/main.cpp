@@ -302,17 +302,19 @@ void blankPal() {
   setPal(pal);    
 }
 
-void menuToGame()
+void menuToGame(pcxImage_t *dblBuf)
 {
   fadeOutPal(gTitlePal);
   gScreen = SCREEN_GAME;
+  clearImage(dblBuf);
+  flip(dblBuf);
   setPal(gGamePal);
 }
 
-void doMenuLogic()
+void doMenuLogic(pcxImage_t *dblBuf)
 {
   if (gKeyDown[0x48]) 
-    menuToGame();
+    menuToGame(dblBuf);
 }
 
 /*
@@ -433,7 +435,7 @@ void showTitle(pcxImage_t *dblBuf)
   blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
   flip(dblBuf);
   fadeInPal(gTitlePal);
-  blitFont(&gFontTiny, dblBuf->pixels, "PRE-ALPHA TEST NOVEMBER 2025", 0, 0);
+  blitFont(&gFontTiny, dblBuf->pixels, "DOSTEMBER GAMEJAM EDITION 1.0, NOVEMBER 2025", 0, 0);
   blitFont(&gFontMedium, dblBuf->pixels, "PRESS ACCELERATOR TO START", 0, 170);
   blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
 }
@@ -497,7 +499,7 @@ int main(int argc, char *argv[])
 
  showTitle(&dblBuf);
 
- while (!gQuitNow && !gameState.crossedFinish)
+ while (!gQuitNow && !gameState.crossedFinish && gameState.gameOverCountdown != 0)
  {
 
   if (!gFrameskip) {
@@ -506,7 +508,7 @@ int main(int argc, char *argv[])
       doGameDraw(&gameState, &dblBuf);
     }
     else {
-      doMenuLogic();
+      doMenuLogic(&dblBuf);
     }
   }
   while (gTimerCounter > 0) {
@@ -515,7 +517,7 @@ int main(int argc, char *argv[])
         doGameLogic(&gameState);
       }
       else {
-        doMenuLogic();
+        doMenuLogic(&dblBuf);
       }
     }
     if (++gTicks >= 70*2)
@@ -564,8 +566,8 @@ if (gameState.crossedFinish)
 else  // ESC
   fadeOutPal(gGamePal);
 
- 
-//fclose(gLogFP);
+cleanup();
+gRadPlayer.Stop();
 
  return 0;
 }
