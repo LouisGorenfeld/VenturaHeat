@@ -404,10 +404,17 @@ void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
   flip(dblBuf);
   for (int i=0; i < 2*70; i++) waitVsync();
 
+  int dnf = 0;
   for (int i=0; i < MAX_STAGES; i++) {
     int time = state->laptimes[i];
     float fTime = (float)time / 70.0f;
-    sprintf(results, "LAP %d - %.02f SEC", i, fTime);
+    if (fTime > 0) {
+      sprintf(results, "LAP %d - %.02f SEC", i+1, fTime); 
+    }
+    else {
+      sprintf(results, "LAP %d - DNF", i+1);
+      dnf = 1;
+    }
     blitFont(&gFontTiny, dblBuf->pixels, results, (320-(gFontTiny.fontWidth*strlen(results)))>>1, y);
     y += gFontTiny.fontHeight + 2;
     flip(dblBuf);
@@ -416,7 +423,10 @@ void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
 
   for (int j=0; j < 70; j++) waitVsync();
   y += 5;
-  sprintf(results, "TOTAL TIME: %f SEC", (float)state->totaltime / 70.0f);
+  if (dnf == 0)
+    sprintf(results, "TOTAL TIME: %.02f SEC", (float)state->totaltime / 70.0f);
+  else
+    sprintf(results, "PLEASE TRY AGAIN");
   blitFont(&gFontTiny, dblBuf->pixels, results, (320-(gFontTiny.fontWidth*strlen(results)))>>1, y);
 
   flip(dblBuf);
@@ -561,7 +571,7 @@ int main(int argc, char *argv[])
 }
 
 killSfx(&gameState.sfxState);
-if (gameState.crossedFinish)
+if (!gQuitNow)
   showRaceOver(&dblBuf, &gameState);
 else  // ESC
   fadeOutPal(gGamePal);
