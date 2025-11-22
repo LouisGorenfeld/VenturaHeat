@@ -5,8 +5,9 @@ https://louisgorenfeld.itch.io/ventura-heat
 Produced during the 2025 DOStember game jam!
 https://itch.io/jam/dosember-game-jam
 
-Art, music, code, and design, 2025 Extent of the Jam
-Pre-alpha build 
+Art, music, code, and design, 2025 Extent of the Jam / Louis Gorenfeld
+
+Ventura Heat is a first person arcade racer inspired by yesterday's driving games. Tear up six scorching highways in an attempt to beat the clock. You think you got what it takes?
 
 Goal: Get to each checkpoint within the time limit
 

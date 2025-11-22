@@ -44,10 +44,10 @@ void roadCtlInit(roadCtlr_t *ctlr)
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
   ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
-  ctlr->stage[1].cmd = "T(21),l,r,_,ur,d,_,l,u,d,r,_,dr,u,d,l,_,_,U,D";
+  ctlr->stage[1].cmd = "T(21),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
   ctlr->stage[2].cmd = "T(02),d,l,u,dr,u,d,_,l,r,L,L,u,d,r,R,ru,u,_,_,_"; 
 
-  ctlr->stage[3].cmd = "T(03),T(23),_,_,_,u,_,l,_,d,_,_,_,_,l,r,_,_,_";
+  ctlr->stage[3].cmd = "T(03),T(23),_,_,_,u,_,l,l,d,_,d,d,u,l,r,_,_,_";
 
   ctlr->stage[4].cmd = "T(11),rd,T(01)_,rT(21),R,r,_,_,U,D,r,H,LT(10),T(02),l,uR,Ur,D";
   ctlr->stage[5].cmd = "T(04),T(00),T(24)l,l,uL,dL,L,R,u,l,d,_,L,h,U,l,R,uR,ul,_,_";
@@ -388,14 +388,17 @@ void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
     speed += ITOFIX(rand() & 31);
     if (pattern == 3) {
         fixed_t z = ZFARPLANE-1;
-        car = roadCtlAddCar(ctlr, laneXs[0], z, speed, CARTYPE_COUPE, texNum);
-        car =roadCtlAddCar(ctlr, laneXs[2], z - 512, speed, CARTYPE_COUPE, texNum);
-//      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
+        int lane = rand() % 3;
+        car = roadCtlAddCar(ctlr, laneXs[lane], z, speed, CARTYPE_COUPE, texNum);
+        lane = (lane + 1) % 3;
+        car = roadCtlAddCar(ctlr, laneXs[lane], z - 512, speed, CARTYPE_COUPE, texNum);
     }
     else {
         const int lane = pattern;      
-        car =roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, texNum);
-//      roadCtlAddCar(ctlr, 0, z, speed, CARTYPE_COUPE);
+        // Left lane gets a speed boost
+        if (lane == 0)
+          speed += ITOFIX(20);
+        car = roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, texNum);
     }
 
   // If rank is > 3, you start getting ambulances in the right lane

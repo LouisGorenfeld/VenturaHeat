@@ -118,9 +118,9 @@ void plrEndShift(gameState_t *state)
 void doGameInputs(gameState_t *state)
 {
     if (gKeyDown[0x4b]) // left
-      plrSteer(state, -4);
+      plrSteer(state, -3);
     else if (gKeyDown[0x4d]) // right
-      plrSteer(state, 4);
+      plrSteer(state, 3);
     else
       plrAutocenter(state, 1);
 

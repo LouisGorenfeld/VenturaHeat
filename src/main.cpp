@@ -435,7 +435,7 @@ void showTitle(pcxImage_t *dblBuf)
   blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
   flip(dblBuf);
   fadeInPal(gTitlePal);
-  blitFont(&gFontTiny, dblBuf->pixels, "DOSTEMBER GAMEJAM EDITION 1.0, NOVEMBER 2025", 0, 0);
+  blitFont(&gFontTiny, dblBuf->pixels, "DOSTEMBER GAMEJAM EDITION 1.0, NOVEMBER 2025 BY EXTENT OF THE JAM", 0, 0);
   blitFont(&gFontMedium, dblBuf->pixels, "PRESS ACCELERATOR TO START", 0, 170);
   blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
 }
