@@ -225,10 +225,8 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   int nextStageLoaded = 0;
   roadLive_t *live = &ctlr->roadLive;
   fixed_t xScrollAmount = (getCurveAmount(live) * (fixed_t)zAmt) << 0;
-  fixed_t yScrollAmount = -(getHillAmount(live) * (fixed_t)zAmt) >> 3;
-  fixed_t yOffsetDest = -getHillAmount(live) << 8;
-
-//  yOffsetDest = 0; // TODO: Maybe we want to use this again
+//  fixed_t yScrollAmount = -(getHillAmount(live) * (fixed_t)zAmt) >> 3;
+//  fixed_t yOffsetDest = -getHillAmount(live) << 8;
 
   live->texOff =(live->texOff + zAmt) & ((1<<ZMAPBITS)-1);
   live->z += zAmt;
@@ -301,7 +299,7 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
   // Scroll horizon based on speed and turn sharpness
   live->xHorizon += xScrollAmount;
-
+/*
   if (live->yOffsetHorizon < yOffsetDest)
   {
     live->yOffsetHorizon += yScrollAmount;
@@ -314,6 +312,8 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
     if (live->yOffsetHorizon < yOffsetDest)
        live->yOffsetHorizon = yOffsetDest;
   }  
+*/
+  live->yOffsetHorizon = 0; // Glue the horizon to the top of the road for now
 
   return nextStageLoaded;
 }

@@ -430,7 +430,7 @@ void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
   blitFont(&gFontTiny, dblBuf->pixels, results, (320-(gFontTiny.fontWidth*strlen(results)))>>1, y);
 
   flip(dblBuf);
-  for (int i=0; i < 7*70; i++)
+  for (int i=0; i < 10*70; i++)
     waitVsync();
 
   fadeOutPal(p);
