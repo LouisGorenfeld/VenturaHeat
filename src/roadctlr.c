@@ -346,9 +346,11 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
       // Cull if outside z range
       if (car->roadObj.z <= 0 || car->roadObj.z >= ZFARCULL) 
       {
-        // If it's a scenery change, then the scenery at the front of the screen
-        // becomes this one
-        if (car->type == CARTYPE_DUMMY_SCEN)
+        roadCtlRemoveCar(ctlr, car);
+      }
+      else if (car->roadObj.z <= ZNEARPLANE) {  // Deal with any special objects
+        // Set scenery. This has to be done before it gets clipped.
+        if (car->roadObj.car->type == CARTYPE_DUMMY_SCEN)
         {
           if (car->roadObj.x == 0)
             ctlr->roadLive.roadTex = car->roadObj.img;
@@ -357,8 +359,6 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
           else if (car->roadObj.x == 1)
             ctlr->roadLive.sideTex[1] = car->roadObj.img;
         } 
-        
-        roadCtlRemoveCar(ctlr, car);
       }
     }
   }

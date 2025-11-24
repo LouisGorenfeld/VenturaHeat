@@ -481,10 +481,11 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
           // Using z instead of tying scale to the width of the road at that line
           // is smoother, but costs a division.
           pObj->scale = (1<<FIXSHIFT<<7) / pObj->z;
-          if (pObj->scale == 0)
-            printf("SET SCALE TO 0 for z=%d\n", pObj->z);
           pObj->sx = FIXTOI(HSW16 + xoff + ((pObj->x>>8)*pObj->scale));
         }
+      }
+      else {
+        pObj->sy = -1;
       }
 
       pObj = pObj->next;
