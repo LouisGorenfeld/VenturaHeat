@@ -44,7 +44,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
   ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
-  ctlr->stage[1].cmd = "T(21),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
+  ctlr->stage[1].cmd = "T(24),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
   ctlr->stage[2].cmd = "T(02),d,l,u,dr,u,d,_,l,r,L,L,u,d,r,R,ru,u,_,_,_"; 
 
   ctlr->stage[3].cmd = "T(03),T(23),_,_,_,u,_,l,l,d,_,d,d,u,l,r,_,_,_";

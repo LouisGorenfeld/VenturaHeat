@@ -5,7 +5,7 @@ CFLAGS_DBG = -O0 -g
 CFLAGS_PROF = -pg -g -O3
 CFLAGS_PROD = -O2 -funroll-loops
 CFLAGS = -fpermissive
-STRIP = i596-pc-msdosgjcpp-strip
+STRIP = i586-pc-msdosdjgpp-strip
 
 SRC_DIR = src
 CDATA_DIR = src/data
