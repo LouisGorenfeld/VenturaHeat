@@ -27,8 +27,10 @@
 // Z index of the different curve thresholds (see render function)
 // Lower is farther
 #define ZPOSCURVETHRESH1 45
-#define ZPOSCURVETHRESH2 15
-#define ZPOSCURVETHRESH3 8
+#define ZPOSCURVETHRESH2 30
+#define ZPOSCURVETHRESH3 20
+#define ZPOSCURVETHRESH4 15
+#define ZPOSCURVETHRESH5 8
 
 unsigned short hZMap[ZMAPLEN];
 
@@ -374,9 +376,17 @@ void drawRow(pcxImage_t *dest, roadLive_t *live,
 // Dampen curves in the foreground and exaggerate them in the distance
 fixed_t ddShiftCurve(fixed_t dd, int zIdx)
 {
-  if (zIdx <= ZPOSCURVETHRESH3)
+  if (zIdx <= ZPOSCURVETHRESH5)
   {
     return dd << 3;
+  }
+  else if (zIdx <= ZPOSCURVETHRESH4)
+  {
+    return dd << 2;
+  }
+  else if (zIdx <= ZPOSCURVETHRESH3)
+  {
+    return dd << 1;
   }
   else if (zIdx <= ZPOSCURVETHRESH2)
   {
@@ -501,7 +511,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
     while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
       scenObj = scenObj->next;
 
-    if (sy < syLast)
+//    if (sy < syLast)
+    if (1)
     {
       if (scenObj && scenObj->sy == sy) 
       {

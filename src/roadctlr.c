@@ -11,9 +11,11 @@
 #define LIGHTCURVE 5000 //7000
 #define MEDCURVE 8000 //11000
 #define SHARPCURVE 10000
-#define LIGHTHILL 100
-#define MEDHILL 300
-#define SHARPHILL 1000
+#define LIGHTHILL_U 100
+#define LIGHTHILL_D -50
+#define MEDHILL_U 200
+#define MEDHILL_D -100
+//#define SHARPHILL 1000
 
 // HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
 
@@ -41,7 +43,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
   //TEST:
 //  char *testStr = "UT(11),lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
 //  char *testStr = "U,lU,Ld,ru,D,d,rD,RD,U,_,l,l,H,r,ld,u,D,U,d,U,U,rd,lD,D,ru,ld,RU,R,r,RD,_l,r,l,L,_,u,dr,_,D,u,d,u,L,l,l,R,L,R,r,u,H,U,d,D,r,d,_,l,l,L,_,Ur,u,D,d,_,l,l,u,U,_,_,d,l,D,d,r,_,_,l,r,r,_,_,l,R,r,r,_,_,r,R,L,L,L,_,_,r,r,R,r,_,_,_,R,l,_,_,_,_,_,_,_";
-  char *testStr = "L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
+  //char *testStr = "U,D,L,R,_,U,D,l,_,T(00),l,r,T(10),u,d,r,d,u,l,R,D,U,l,d,_,d,l_l,ur,d,_,u,R,r,_,l,dr,d,U,D,_rRRLl,uR,dL,H,r";
 
   ctlr->stage[0].cmd = "_,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
   ctlr->stage[1].cmd = "T(24),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
@@ -162,10 +164,10 @@ int parseCommand(roadCtlr_t *ctlr)
       case 'R':  live->ddxSeg = MEDCURVE;      break;
       case 'h':  live->ddxSeg = -SHARPCURVE;   break;
       case 'H':  live->ddxSeg = SHARPCURVE;    break;
-      case 'u':  live->ddySeg = MEDHILL;       break;
-      case 'U':  live->ddySeg = SHARPHILL;     break;
-      case 'd':  live->ddySeg = -LIGHTHILL;    break;
-      case 'D':  live->ddySeg = -MEDHILL;      break;
+      case 'u':  live->ddySeg = MEDHILL_U;       break;
+      case 'U':  live->ddySeg = MEDHILL_U;     break;
+      case 'd':  live->ddySeg = LIGHTHILL_D;    break;
+      case 'D':  live->ddySeg = MEDHILL_D;      break;
       case '_':  live->ddxSeg = 0;
                  live->ddySeg = 0;
                  break;
