@@ -105,7 +105,10 @@ struct roadLive_t
 
 void roadInit(roadDef_t *def, roadLive_t *live);
 
-void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset);
+// yOffset is for shifting it up or down the screen
+// yOmitStart and yOmitEnd are for preventing overdraw when something like a tunnel or overpass
+// is drawn
+void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, int yOmitEnd);
 // Add the display list item for the object
 void linkRoadObj(roadLive_t *live, roadObj_t *obj);
 void unlinkRoadObj(roadLive_t *live, roadObj_t *obj);

@@ -541,7 +541,7 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
   }
 
   //  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
-  roadDraw(&state->roadCtlr.roadLive, buf, 0);
+  roadDraw(&state->roadCtlr.roadLive, buf, 0, 200, 200);
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );

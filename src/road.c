@@ -433,7 +433,7 @@ typedef struct renderState_t {
   fixed_t y;
 } renderState_t;
 
-void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
+void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, int yOmitEnd)
 {
   int i;
 
@@ -528,7 +528,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset)
           scenObj = scenObj->next;
       }
 
-      drawRow(dest, live, roadTex, &sideTex[0], sy, rl, rr, zOff);
+      if (sy < yOmitStart || sy > yOmitEnd)
+        drawRow(dest, live, roadTex, &sideTex[0], sy, rl, rr, zOff);
     }
     
     // Bring syLast up to sy
