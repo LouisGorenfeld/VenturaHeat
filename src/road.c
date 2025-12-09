@@ -433,6 +433,7 @@ typedef struct renderState_t {
   fixed_t y;
 } renderState_t;
 
+
 void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, int yOmitEnd)
 {
   int i;
@@ -511,29 +512,30 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
       scenObj = scenObj->next;
 
-//    if (sy < syLast)
-    if (1)
+    if (sy < syLast)
     {
-      if (scenObj && scenObj->sy == sy) 
-      {
-        if (scenObj->x == 0) // road 
-          roadTex = scenObj->img;
-        else if (scenObj->x == -1) // left side
-          sideTex[0] = scenObj->img;
-        else if (scenObj->x == 1) // right side
-          sideTex[1] = scenObj->img;
-
-        // Queue up next scenery change incident
-        while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
-          scenObj = scenObj->next;
-      }
-
       if (sy < yOmitStart || sy > yOmitEnd)
         drawRow(dest, live, roadTex, &sideTex[0], sy, rl, rr, zOff);
     }
+
+    if (scenObj && scenObj->sy == sy) 
+    {
+      if (scenObj->x == 0) // road 
+        roadTex = scenObj->img;
+      else if (scenObj->x == -1) // left side
+        sideTex[0] = scenObj->img;
+      else if (scenObj->x == 1) // right side
+        sideTex[1] = scenObj->img;
+
+      // Queue up next scenery change incident
+      while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
+        scenObj = scenObj->next;
+    }
+
     
     // Bring syLast up to sy
     // Quick line doubling technique
+    // BUG: If sy and syLast are both below the horizon but traveling upwards again, is it overdrawing?
     if (syLast - sy > 1)
     {
       for (; syLast > (sy+1); syLast--)
@@ -559,8 +561,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     // Do this at the end because we use dy above for line doubling
     // ZPOSCURVETHRESH keeps the curves mellow in the front of the screen
     // but bending more severely in the distance
-    if (i <= live->segPos>>16)
-    {
+    if (i <= live->segPos>>16)    {
       dx += ddShiftCurve(live->ddxSeg, i);
       dy += ddShiftHill(live->ddySeg, i);
     }
