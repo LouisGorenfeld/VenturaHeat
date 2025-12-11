@@ -15,6 +15,7 @@
 #include "game.h"
 #include "draw.h"
 #include "data.h"
+#include "records.h"
 
 
 typedef enum screen_t {
@@ -484,6 +485,7 @@ int main(int argc, char *argv[])
 
  loadGfx();
  gameInit(&gameState);
+ loadRecords(&gameState);
 
  loadPCX(&fontImg, data_font4x5);
  initFont(&fontImg, &gFontTiny, 0, 4, 5);
@@ -570,11 +572,17 @@ int main(int argc, char *argv[])
   doInput();
 }
 
+refreshRecords(&gameState);
+saveRecords(&gameState);
 killSfx(&gameState.sfxState);
-if (!gQuitNow)
+if (!gQuitNow) {
   showRaceOver(&dblBuf, &gameState);
-else  // ESC
+}
+else {  // ESC
   fadeOutPal(gGamePal);
+}
+
+
 
 cleanup();
 gRadPlayer.Stop();

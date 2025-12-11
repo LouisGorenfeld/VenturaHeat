@@ -29,6 +29,12 @@ typedef struct plrCtrls_t
 } plrCtrls_t;
 
 
+typedef struct lapRecord_t
+{
+  int time;   // in frames
+  char initials[3];
+} lapRecord_t;
+
 typedef struct gameState_t
 {
   int timeLeft;
@@ -51,6 +57,10 @@ typedef struct gameState_t
 
   int gameOverCountdown;
   int crossedFinish;
+
+
+  lapRecord_t bestLaptimes[MAX_STAGES];
+  lapRecord_t bestTotalTime;
 
 } gameState_t;
 

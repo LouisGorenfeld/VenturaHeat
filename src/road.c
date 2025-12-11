@@ -561,7 +561,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     // Do this at the end because we use dy above for line doubling
     // ZPOSCURVETHRESH keeps the curves mellow in the front of the screen
     // but bending more severely in the distance
-    if (i <= live->segPos>>16)    {
+    if (i <= live->segPos>>16)    
+    {
       dx += ddShiftCurve(live->ddxSeg, i);
       dy += ddShiftHill(live->ddySeg, i);
     }

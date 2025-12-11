@@ -92,7 +92,7 @@ struct roadLive_t
   fixed_t seg;       // which segment number we are on
 
   unsigned short texOff;    // offset into texture map
-  fixed_t segPos;           // position of segment in the ZMap
+  fixed_t segPos;           // position of segment (z)
   fixed_t halfWidth;        // half the width of the road
   unsigned char drawFlags;  // See DRAWSIDE defines
 
