@@ -10,8 +10,9 @@
 #include "data.h"
 
 extern pcxFont_t gFontTiny;
-extern pcxFont_t gFontDigi;
+extern pcxImage_t gFontDigiImg;
 extern pcxFont_t gFontMedium;
+extern pcxImage_t gTachImg;
 extern int gLastFPS;
 
 extern char gKeyDown[128];
@@ -20,7 +21,7 @@ extern char gKeyDown[128];
 #define MAXSTEER 256
 #define SPEEDLOSS FTOFIX(.25) // speed is multiplied against this in a crash; 16.16 fixed point
 
-#define TIMESTART 75*70
+#define TIMESTART 70*70
 #define TIMEBONUS 60*70
 
 pcxImage_t gCarHoodImg;
@@ -33,10 +34,6 @@ void gameInit(gameState_t *state)
   state->timeLeft = TIMESTART;
   state->gameOverCountdown = -1;
 
-//  printf("carhood %c\n", *data_carhood);
-//printf("data_roadtex3 = %p (size = %zu)\n", data_carhood, sizeof(data_carhood));
-//while(1);
-//  loadPCXFile(&gCarHoodImg, "data/carhood.pcx");
   loadPCX(&gCarHoodImg, data_carhood);
 }
 
@@ -532,15 +529,27 @@ void drawDebug(gameState_t *state, pcxImage_t *buf)
 //  drawSquare(buf, 160-32, 120, 160+32, 120+48, 0);
 }
 
+void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
+{
+  char str[128];
+  sprintf(str, "%d", num);  
+  char *p = str;
+  int wx = x;
+  while (*p) {
+    const int rx = 24 * (*p - '0');
+    blitPCXClip(numImg, dblBuf, wx, y, rx, 0, rx + 24, numImg->height);
+    wx += 24;
+    p++;
+  }
+}
+
 void showTitle(pcxImage_t*);
 void doGameDraw(gameState_t *state, pcxImage_t *buf)
 {
   if (state->gameOverCountdown == 0) {
-//    showTitle(buf);
     return;
   }
 
-  //  roadDraw(&state->roadCtlr.roadLive, buf, ((state->kaThump & 5) != 0));
   roadDraw(&state->roadCtlr.roadLive, buf, 0, 200, 200);
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
@@ -549,6 +558,18 @@ void doGameDraw(gameState_t *state, pcxImage_t *buf)
     int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
     blitFont(&gFontMedium, buf->pixels, state->msg, x, 70);
   }
+
+  // Draw the HUD
+  drawSquare(buf, 0, 0, 320, 32, 0);
+  int cx = (float)gTachImg.width * (float)state->plrCar.rpms / (float)OVERRPMS;
+  if (cx) {
+    blitPCXClip(&gTachImg, buf, 24*4, 8, 0, 0, cx, gTachImg.height);
+  }
+
+  // TODO: We really might want to make a compatible font ..
+  drawDigiNum(buf, &gFontDigiImg, FIXTOI(state->plrCar.car.speed), 0, 4);
+  drawDigiNum(buf, &gFontDigiImg, state->plrCar.gear + 1, 200, 4);
+  drawDigiNum(buf, &gFontDigiImg, state->timeLeft/70, 250, 4);
 }
 
 

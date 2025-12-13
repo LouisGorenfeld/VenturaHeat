@@ -17,11 +17,10 @@
 #include "data.h"
 #include "records.h"
 
-
-typedef enum screen_t {
-  SCREEN_TITLE,
-  SCREEN_GAME 
-} screen_t;
+typedef void (*logicFn_t)(gameState_t*);
+typedef void (*drawFn_t)(gameState_t*, pcxImage_t*);
+logicFn_t gCurLogic = 0;
+drawFn_t gCurDraw = 0;
 
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
@@ -42,9 +41,8 @@ _go32_dpmi_seginfo gOldKB, gNewKB;
 
 FILE *gLogFP = 0;
 
-pcxImage_t gTitleImg;
-pcxFont_t gFontTiny, gFontDigi, gFontMedium;
-screen_t gScreen = SCREEN_TITLE;
+pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
+pcxFont_t gFontTiny, gFontMedium;
 
 char gKeyDown[128];
 
@@ -258,44 +256,10 @@ int sbPort()
   return strtol(c, NULL, 16);
 }
 
-void loadRADFile() {
-  FILE *fp = fopen("data/main.rad", "rb");
-  char *data;
-  long size = -1;
-
-  if (!fp) {
-    printf("Could not load audio\n");
-    exit(3);
-  }
-
-  fseek(fp, 0, SEEK_END);
-  size = ftell(fp);
-  printf("Size is %d", (int)size);
-  fseek(fp, 0, SEEK_SET);
-  data = (char*)malloc(size);
-  fread(data, 1, size, fp);
-  fclose(fp);
-
-  gRadPlayer.Init(data, NULL);
-}
-
 void loadRAD() {
   gRadPlayer.Init(data_main, NULL);
 }
 
-void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
-{
-  char str[128];
-  sprintf(str, "%d", num);  
-  char *p = str;
-  int wx = x;
-  while (*p) {
-    const int rx = 24 * (*p - '0');
-    blitPCXClip(numImg, dblBuf, wx, y, rx, 0, rx + 24, numImg->height);
-    wx += 24;
-    p++;
-  }
-}
 
 void blankPal() {
   unsigned char pal[768];
@@ -306,10 +270,11 @@ void blankPal() {
 void menuToGame(pcxImage_t *dblBuf)
 {
   fadeOutPal(gTitlePal);
-  gScreen = SCREEN_GAME;
   clearImage(dblBuf);
   flip(dblBuf);
   setPal(gGamePal);
+
+  // TODO
 }
 
 void doMenuLogic(pcxImage_t *dblBuf)
@@ -317,26 +282,6 @@ void doMenuLogic(pcxImage_t *dblBuf)
   if (gKeyDown[0x48]) 
     menuToGame(dblBuf);
 }
-
-/*
-void shiftInPal(unsigned char pal[])
-{
-  for (int j=0; j < 256; j+=4) {
-    unsigned char p[768];
-    for (int i=0; i < 256; i++) {
-      int x = i-j;
-      if (x < 0)
-        x = 0;
-      p[i] = pal[x];
-    }
-    setPal(p);
-    waitVsync();
-  }
-
-}
-*/
-
-
 
 void fadeInPal(unsigned char pal[]) 
 {
@@ -439,7 +384,6 @@ void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
 
 void showTitle(pcxImage_t *dblBuf)
 {
-  gScreen = SCREEN_TITLE;
   clearImage(dblBuf);
 //  setPal(gTitlePal);
   blankPal();
@@ -460,9 +404,11 @@ int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
- pcxImage_t fontImg, fontDigiImg, fontMediumImg, 
-            tachImg, tex1;
+ pcxImage_t fontImg, fontMediumImg, tex1;
  pcxImage_t dblBuf;
+
+ gCurLogic = doGameLogic;
+ gCurDraw = doGameDraw; 
 
  atexit(cleanup);
 
@@ -493,8 +439,9 @@ int main(int argc, char *argv[])
  loadPCX(&fontMediumImg, data_f10x10);
  initFont(&fontMediumImg, &gFontMedium, 0, 10, 10);
 
- loadPCX(&fontDigiImg, data_diginums);
- loadPCX(&tachImg, data_digitach);
+ loadPCX(&gFontDigiImg, data_diginums);
+
+ loadPCX(&gTachImg, data_digitach);
 
  loadPCX(&gTitleImg, data_vhlogo);
 
@@ -515,58 +462,36 @@ int main(int argc, char *argv[])
  {
 
   if (!gFrameskip) {
-    if (gScreen == SCREEN_GAME) {
-      doGameLogic(&gameState); 
-      doGameDraw(&gameState, &dblBuf);
-    }
-    else {
-      doMenuLogic(&dblBuf);
-    }
+    gCurLogic(&gameState); 
+    gCurDraw(&gameState, &dblBuf);
+    gFPS++;
   }
-  while (gTimerCounter > 0) {
-    if (gFrameskip) {
-      if (gScreen == SCREEN_GAME) {
-        doGameLogic(&gameState);
+  else {
+    while (gTimerCounter > 0) {
+      if (gFrameskip) {
+        gCurLogic(&gameState);
       }
-      else {
-        doMenuLogic(&dblBuf);
-      }
-    }
-    if (++gTicks >= 70*2)
-    {
-      gLastFPS = gFPS / 2;
-      gTicks = 0;
-      gFPS = 0;
+      
+      gTimerCounter--;
     }
 
-    gTimerCounter--;
+    gFPS++;
   }
 
-  gFPS++;
-  if (gScreen == SCREEN_GAME)
-   doGameDraw(&gameState, &dblBuf);
+  // Handle FPS logic
+  if (++gTicks >= 70*2)
+  {
+    gLastFPS = gFPS / 2;
+    gTicks = 0;
+    gFPS = 0;
+  }
 
-
-   
-  // Draw the HUD
-  if (gScreen == SCREEN_GAME) {
-    drawSquare(&dblBuf, 0, 0, 320, 32, 0);
-    int cx = (float)tachImg.width * (float)gameState.plrCar.rpms / (float)OVERRPMS;
-    if (cx) {
-      blitPCXClip(&tachImg, &dblBuf, 24*4, 8, 0, 0, cx, tachImg.height);
-    }
-
-    // TODO: We really might want to make a compatible font ..
-    drawDigiNum(&dblBuf, &fontDigiImg, FIXTOI(gameState.plrCar.car.speed), 0, 4);
-    drawDigiNum(&dblBuf, &fontDigiImg, gameState.plrCar.gear + 1, 200, 4);
-    drawDigiNum(&dblBuf, &fontDigiImg, gameState.timeLeft/70, 250, 4);
-
+  // Draw FPS before flipping
 //    char dbgline[128];
 //    sprintf(dbgline, "FPS: %d", gLastFPS);
 //    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
 
-  }
-
+  gCurDraw(&gameState, &dblBuf);
   waitVsync();
   flip(&dblBuf);
   doInput();
