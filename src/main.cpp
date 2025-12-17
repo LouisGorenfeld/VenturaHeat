@@ -277,11 +277,6 @@ void menuToGame(pcxImage_t *dblBuf)
   // TODO
 }
 
-void doMenuLogic(pcxImage_t *dblBuf)
-{
-  if (gKeyDown[0x48]) 
-    menuToGame(dblBuf);
-}
 
 void fadeInPal(unsigned char pal[]) 
 {
