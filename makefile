@@ -23,7 +23,7 @@ $(TARGET): $(OBJS)
 	$(CC) -o $@ $^
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	$(CC) -c $(CFLAGS) $(CFLAGS_PROD) -o $@ $<
+	$(CC) -c $(CFLAGS) $(CFLAGS_DBG) -o $@ $<
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR) && mkdir -p $(BUILD_DIR)/data

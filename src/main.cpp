@@ -435,7 +435,8 @@ int main(int argc, char *argv[])
  initFont(&fontMediumImg, &gFontMedium, 0, 10, 10);
 
  loadPCX(&fontDefaultImg, data_f6x6);
- initFont(&fontDefaultImg, &gFontDefault, 0, 10, 10);
+ initFont(&fontDefaultImg, &gFontDefault, 0, 8, 8);
+ blitFont(&gFontDefault, dblBuf.pixels, "Test", 0, 0);
 
  loadPCX(&gFontDigiImg, data_diginums);
 
