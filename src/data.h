@@ -9,6 +9,7 @@ extern unsigned char data_coupe2[];
 extern unsigned char data_diginums[];
 extern unsigned char data_digitach[];
 extern unsigned char data_f10x10[];
+extern unsigned char data_f6x6[];
 extern unsigned char data_font4x5[];
 extern unsigned char data_grastex1[];
 extern unsigned char data_horicity[];

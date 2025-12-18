@@ -1,7 +1,9 @@
 #include "menu.h"
+#include "pcxfont.h"
 
 extern char gKeyDown[128];
-
+extern pcxImage_t gTitleImg;
+extern pcxFont_t gFontDefault;
 
 typedef enum mainMenu_t
 {
@@ -12,7 +14,6 @@ typedef enum mainMenu_t
     MENU_QUIT,
     MENU_MAX
 }  mainMenu_t;
-
 
 void doMenuLogic(menuState_t *state)
 {
@@ -46,8 +47,18 @@ void doMenuLogic(menuState_t *state)
   }
 }
 
-void doMenuDraw(pcxImage_t *dblBuf);
+void doMenuDraw(menuState_t *state, pcxImage_t *dblBuf)
 {
-  if (gKeyDown[0x48]) 
-    menuToGame(dblBuf);
+  static const char* menu[] = {"START", "REDEFINE KEYS", "RECORDS", "EXIT TO DOS"};
+  static const int kXMenu = 50;
+  static const int kYMenu = 50;
+
+  for (int i=0; i < MENU_MAX; i++) 
+  {
+    blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu,  + i*gFontDefault.fontHeight);
+  }
+
+  blitFont(&gFontDefault, dblBuf->pixels, ">", 
+    kXMenu - gFontDefault.fontWidth, 
+    kXMenu + state->curIdx*gFontDefault.fontHeight);
 }

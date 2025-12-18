@@ -42,7 +42,7 @@ _go32_dpmi_seginfo gOldKB, gNewKB;
 FILE *gLogFP = 0;
 
 pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
-pcxFont_t gFontTiny, gFontMedium;
+pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 
 char gKeyDown[128];
 
@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
- pcxImage_t fontImg, fontMediumImg, tex1;
+ pcxImage_t fontImg, fontMediumImg, fontDefaultImg, tex1;
  pcxImage_t dblBuf;
 
  gCurLogic = doGameLogic;
@@ -433,6 +433,9 @@ int main(int argc, char *argv[])
 
  loadPCX(&fontMediumImg, data_f10x10);
  initFont(&fontMediumImg, &gFontMedium, 0, 10, 10);
+
+ loadPCX(&fontDefaultImg, data_f6x6);
+ initFont(&fontDefaultImg, &gFontDefault, 0, 10, 10);
 
  loadPCX(&gFontDigiImg, data_diginums);
 

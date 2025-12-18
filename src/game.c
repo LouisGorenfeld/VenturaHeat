@@ -10,8 +10,9 @@
 #include "data.h"
 
 extern pcxFont_t gFontTiny;
-extern pcxImage_t gFontDigiImg;
+extern pcxImage_t gFontDigiImg; // TODO: pad this so we can use normal font routines
 extern pcxFont_t gFontMedium;
+extern pcxFont_t gFontDefault;
 extern pcxImage_t gTachImg;
 extern int gLastFPS;
 
