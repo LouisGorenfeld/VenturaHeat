@@ -321,8 +321,9 @@ void checkObjCollisions(gameState_t *state)
   }
 }
 
-void doGameLogic(gameState_t *state)
+void doGameLogic(void *s)
 {
+  gameState_t *state = (gameState_t*)s;
   if (state->crossedFinish)
     return;
 
@@ -545,8 +546,9 @@ void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
 }
 
 void showTitle(pcxImage_t*);
-void doGameDraw(gameState_t *state, pcxImage_t *buf)
+void doGameDraw(void *s, pcxImage_t *buf)
 {
+  gameState_t *state = (gameState_t*)s;
   if (state->gameOverCountdown == 0) {
     return;
   }

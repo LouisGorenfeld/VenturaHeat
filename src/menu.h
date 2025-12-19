@@ -13,8 +13,8 @@ typedef struct menuState_t
     int keyBackOut;
 } menuState_t;
 
-void initMenu(menuState_t *menu);
-void doMenuLogic();
-void doMenuDraw(pcxImage_t *dblBuf);
+void menuInit(menuState_t *state);
+void doMenuLogic(void *state);
+void doMenuDraw(void *state, pcxImage_t *dblBuf);
 
 #endif

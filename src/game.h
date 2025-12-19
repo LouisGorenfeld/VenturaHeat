@@ -67,9 +67,9 @@ typedef struct gameState_t
 
 void gameInit(gameState_t *state);
 
-void doGameLogic(gameState_t *state);
+void doGameLogic(void *state);
 
-void doGameDraw(gameState_t *state, pcxImage_t *buf);
+void doGameDraw(void *state, pcxImage_t *buf);
 
 #endif
 

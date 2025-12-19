@@ -16,11 +16,21 @@
 #include "draw.h"
 #include "data.h"
 #include "records.h"
+#include "menu.h"
 
-typedef void (*logicFn_t)(gameState_t*);
-typedef void (*drawFn_t)(gameState_t*, pcxImage_t*);
-logicFn_t gCurLogic = 0;
-drawFn_t gCurDraw = 0;
+typedef void (*logicFn_t)(void*);
+typedef void (*drawFn_t)(void*, pcxImage_t*);
+
+typedef struct screen_t
+{
+  logicFn_t logicFn;
+  drawFn_t drawFn;
+  void *state;  // screen-specific state
+} screen_t;
+
+screen_t gScreenMenu;
+screen_t gScreenGame;
+screen_t gCurScreen;
 
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
@@ -395,15 +405,17 @@ void clearImage(pcxImage_t *p)
   memset(p->pixels, 0, p->height*p->width);
 }
 
+void initScreens() 
+{
+}
+
 int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
+ menuState_t menuState;
  pcxImage_t fontImg, fontMediumImg, fontDefaultImg, tex1;
  pcxImage_t dblBuf;
-
- gCurLogic = doGameLogic;
- gCurDraw = doGameDraw; 
 
  atexit(cleanup);
 
@@ -421,11 +433,19 @@ int main(int argc, char *argv[])
    dblBuf.lines[i] = dblBuf.pixels + dblBuf.width*i;
 
 
- 
+ gScreenGame.drawFn = doGameDraw;
+ gScreenGame.logicFn = doGameLogic;
+ gScreenGame.state = (void*)&gameState;
+
+ gScreenMenu.drawFn = doMenuDraw;
+ gScreenMenu.logicFn = doMenuLogic;
+ gScreenMenu.state = (void*)&menuState;
+
  loadRAD();
 
  loadGfx();
  gameInit(&gameState);
+ menuInit(&menuState);
  loadRecords(&gameState);
 
  loadPCX(&fontImg, data_font4x5);
@@ -436,7 +456,6 @@ int main(int argc, char *argv[])
 
  loadPCX(&fontDefaultImg, data_f6x6);
  initFont(&fontDefaultImg, &gFontDefault, 0, 8, 8);
- blitFont(&gFontDefault, dblBuf.pixels, "Test", 0, 0);
 
  loadPCX(&gFontDigiImg, data_diginums);
 
@@ -455,20 +474,22 @@ int main(int argc, char *argv[])
  gRadPlayer.SetSpeed(5);
 
 
- showTitle(&dblBuf);
+// showTitle(&dblBuf);
+
+gCurScreen = gScreenMenu;
 
  while (!gQuitNow && !gameState.crossedFinish && gameState.gameOverCountdown != 0)
  {
 
   if (!gFrameskip) {
-    gCurLogic(&gameState); 
-    gCurDraw(&gameState, &dblBuf);
+    gCurScreen.logicFn(&gameState); 
+    gCurScreen.drawFn(&gameState, &dblBuf);
     gFPS++;
   }
   else {
     while (gTimerCounter > 0) {
       if (gFrameskip) {
-        gCurLogic(&gameState);
+        gCurScreen.logicFn(&gameState);
       }
       
       gTimerCounter--;
@@ -490,7 +511,7 @@ int main(int argc, char *argv[])
 //    sprintf(dbgline, "FPS: %d", gLastFPS);
 //    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
 
-  gCurDraw(&gameState, &dblBuf);
+  gCurScreen.drawFn(&gameState, &dblBuf);
   waitVsync();
   flip(&dblBuf);
   doInput();

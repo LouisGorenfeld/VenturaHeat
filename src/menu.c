@@ -1,3 +1,4 @@
+#include <string.h>
 #include "menu.h"
 #include "pcxfont.h"
 
@@ -15,8 +16,14 @@ typedef enum mainMenu_t
     MENU_MAX
 }  mainMenu_t;
 
-void doMenuLogic(menuState_t *state)
+void menuInit(menuState_t *state)
 {
+  memset(state, 0, sizeof(menuState_t));
+}
+
+void doMenuLogic(void *s)
+{
+  menuState_t *state = s;
 
   if (gKeyDown[0x48]) // up 
   {
@@ -47,18 +54,19 @@ void doMenuLogic(menuState_t *state)
   }
 }
 
-void doMenuDraw(menuState_t *state, pcxImage_t *dblBuf)
+void doMenuDraw(void *s, pcxImage_t *dblBuf)
 {
+  menuState_t *state = (menuState_t*)s;
   static const char* menu[] = {"START", "REDEFINE KEYS", "RECORDS", "EXIT TO DOS"};
   static const int kXMenu = 50;
   static const int kYMenu = 50;
 
   for (int i=0; i < MENU_MAX; i++) 
   {
-    blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu,  + i*gFontDefault.fontHeight);
+    blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu, kYMenu + i*gFontDefault.fontHeight);
   }
 
   blitFont(&gFontDefault, dblBuf->pixels, ">", 
     kXMenu - gFontDefault.fontWidth, 
-    kXMenu + state->curIdx*gFontDefault.fontHeight);
+    kYMenu + state->curIdx*gFontDefault.fontHeight);
 }
