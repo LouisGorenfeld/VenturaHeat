@@ -482,14 +482,14 @@ gCurScreen = gScreenMenu;
  {
 
   if (!gFrameskip) {
-    gCurScreen.logicFn(&gameState); 
-    gCurScreen.drawFn(&gameState, &dblBuf);
+    gCurScreen.logicFn(gCurScreen.state); 
+    gCurScreen.drawFn(gCurScreen.state, &dblBuf);
     gFPS++;
   }
   else {
     while (gTimerCounter > 0) {
       if (gFrameskip) {
-        gCurScreen.logicFn(&gameState);
+        gCurScreen.logicFn(gCurScreen.state);
       }
       
       gTimerCounter--;
@@ -511,7 +511,7 @@ gCurScreen = gScreenMenu;
 //    sprintf(dbgline, "FPS: %d", gLastFPS);
 //    blitFont(&gFontTiny, dblBuf.pixels, dbgline, 75, 8);
 
-  gCurScreen.drawFn(&gameState, &dblBuf);
+  gCurScreen.drawFn(gCurScreen.state, &dblBuf);
   waitVsync();
   flip(&dblBuf);
   doInput();

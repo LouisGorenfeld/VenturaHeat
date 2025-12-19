@@ -130,7 +130,8 @@ void initFont(pcxImage_t *img, pcxFont_t *f,
 
 void blitFont(pcxFont_t *font, unsigned char *dest, char *string, int x, int y)
 {
- char *s = string;
+  char *s = string;
+
  while (*s != '\0')
  {
   blitChar(font, *s, x, y, dest);

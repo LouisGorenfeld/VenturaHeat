@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "menu.h"
 #include "pcxfont.h"
@@ -57,16 +58,18 @@ void doMenuLogic(void *s)
 void doMenuDraw(void *s, pcxImage_t *dblBuf)
 {
   menuState_t *state = (menuState_t*)s;
-  static const char* menu[] = {"START", "REDEFINE KEYS", "RECORDS", "EXIT TO DOS"};
+  static const char* menu[] = {"START", "REDEFINE KEYS", "RECORDS", "DOCS", "EXIT TO DOS"};
   static const int kXMenu = 50;
   static const int kYMenu = 50;
 
+
+
   for (int i=0; i < MENU_MAX; i++) 
   {
-    blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu, kYMenu + i*gFontDefault.fontHeight);
+    blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu, kYMenu + i*10);
   }
 
-  blitFont(&gFontDefault, dblBuf->pixels, ">", 
+  blitFont(&gFontDefault, dblBuf->pixels, "O", 
     kXMenu - gFontDefault.fontWidth, 
     kYMenu + state->curIdx*gFontDefault.fontHeight);
 }
