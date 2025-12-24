@@ -44,7 +44,7 @@ void doMenuLogic(void *s)
   {
     if (!state->keyNextItem) 
     {
-      if (state->curIdx < MENU_MAX-1)
+      if (state->curIdx < MENU_MAX)
         state->curIdx++;
     }
     state->keyNextItem = 1;
@@ -62,14 +62,14 @@ void doMenuDraw(void *s, pcxImage_t *dblBuf)
   static const int kXMenu = 50;
   static const int kYMenu = 50;
 
-
+  memset(dblBuf->pixels, 1, 64000);
 
   for (int i=0; i < MENU_MAX; i++) 
   {
     blitFont(&gFontDefault, dblBuf->pixels, menu[i], kXMenu, kYMenu + i*10);
   }
 
-  blitFont(&gFontDefault, dblBuf->pixels, "O", 
-    kXMenu - gFontDefault.fontWidth, 
+  blitFont(&gFontDefault, dblBuf->pixels, "(", 
+    kXMenu - (gFontDefault.fontWidth<<1), 
     kYMenu + state->curIdx*gFontDefault.fontHeight);
 }

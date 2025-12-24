@@ -37,7 +37,7 @@ void refreshRecords(gameState_t *state)
 
 void loadRecords(gameState_t *state)
 {
-    FILE *fp = fopen("vh.cfg", "rb");
+    FILE *fp = fopen("vh.rec", "rb");
     if (fp) 
     {
         if (fgetc(fp) != 'V' || fgetc(fp) != '0') {

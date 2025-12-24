@@ -17,6 +17,8 @@
 #include "data.h"
 #include "records.h"
 #include "menu.h"
+#include "config.h"
+#include "main.h"
 
 typedef void (*logicFn_t)(void*);
 typedef void (*drawFn_t)(void*, pcxImage_t*);
@@ -55,11 +57,6 @@ pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
 pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 
 char gKeyDown[128];
-
-void clearImage(pcxImage_t*);
-void fadeOutPal(unsigned char pal[]);
-void fadeInPal(unsigned char pal[]);
-void blankPal();
 
 void handleTimer()
 {
@@ -405,15 +402,12 @@ void clearImage(pcxImage_t *p)
   memset(p->pixels, 0, p->height*p->width);
 }
 
-void initScreens() 
-{
-}
-
 int main(int argc, char *argv[])
 {
  int i;
  gameState_t gameState;
  menuState_t menuState;
+ config_t config;
  pcxImage_t fontImg, fontMediumImg, fontDefaultImg, tex1;
  pcxImage_t dblBuf;
 
@@ -440,6 +434,8 @@ int main(int argc, char *argv[])
  gScreenMenu.drawFn = doMenuDraw;
  gScreenMenu.logicFn = doMenuLogic;
  gScreenMenu.state = (void*)&menuState;
+
+ loadOrInitConfig(&config);
 
  loadRAD();
 
@@ -472,9 +468,6 @@ int main(int argc, char *argv[])
  // Start engine!
  triggerSfx(&gameState.sfxState, kSFX_Engine);
  gRadPlayer.SetSpeed(5);
-
-
-// showTitle(&dblBuf);
 
 gCurScreen = gScreenMenu;
 
@@ -519,7 +512,9 @@ gCurScreen = gScreenMenu;
 
 refreshRecords(&gameState);
 saveRecords(&gameState);
+writeConfig(&config);
 killSfx(&gameState.sfxState);
+
 if (!gQuitNow) {
   showRaceOver(&dblBuf, &gameState);
 }
