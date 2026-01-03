@@ -5,8 +5,12 @@
 
 typedef struct menuState_t
 {
+    int state;
+    int subState;
+
     int curIdx;
 
+    // Booleans for picking up keypresses
     int keyNextItem;
     int keyPrevItem;
     int keySelectItem;

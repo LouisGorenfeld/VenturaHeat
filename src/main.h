@@ -6,7 +6,7 @@
 #include "game.h"
 
 // Palette functions
-void fadeOutPal(unsigned char pal[]);
+void fadeOutPal();
 void fadeInPal(unsigned char pal[]);
 void setPal(unsigned char *pal);
 void blankPal();
@@ -18,9 +18,13 @@ void flip(pcxImage_t *buf);
 void waitVsync();
 
 // Transitions
-void menuToGame(pcxImage_t *dblBuf);
-void showRaceOver(pcxImage_t *dblBuf, gameState_t *state);
-void showTitle(pcxImage_t *dblBuf);
+void menuToGame();
+void showRaceOver();
+void showTitle();
+
+// Keyboard
+extern char gKeyDown[128];
+extern char gLastKeyDown;
 
 // Crap that should be in gfxstore
 extern pcxImage_t gTitleImg, gFontDigiImg, gTachImg;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 #include "game.h"
 #include "lmath.h"
 #include "draw.h"
@@ -15,8 +16,6 @@ extern pcxFont_t gFontMedium;
 extern pcxFont_t gFontDefault;
 extern pcxImage_t gTachImg;
 extern int gLastFPS;
-
-extern char gKeyDown[128];
 
 #define MAXOFFROADSPEED 164
 #define MAXSTEER 256
@@ -545,7 +544,7 @@ void drawDigiNum(pcxImage_t *dblBuf, pcxImage_t *numImg, int num, int x, int y)
   }
 }
 
-void showTitle(pcxImage_t*);
+void showTitle();
 void doGameDraw(void *s, pcxImage_t *buf)
 {
   gameState_t *state = (gameState_t*)s;

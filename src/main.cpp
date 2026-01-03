@@ -8,20 +8,23 @@
 #include <sys/farptr.h>
 #include <crt0.h>
 #include <malloc.h>
+
+#include "main.h"
+
 #include "player20.h"
-#include "loadpcx.h"
-#include "pcxfont.h"
 #include "road.h"
-#include "game.h"
 #include "draw.h"
 #include "data.h"
 #include "records.h"
 #include "menu.h"
 #include "config.h"
-#include "main.h"
+
+
 
 typedef void (*logicFn_t)(void*);
 typedef void (*drawFn_t)(void*, pcxImage_t*);
+
+
 
 typedef struct screen_t
 {
@@ -34,6 +37,8 @@ screen_t gScreenMenu;
 screen_t gScreenGame;
 screen_t gCurScreen;
 
+
+
 int _crt0_startup_flags = _CRT0_FLAG_LOCK_MEMORY;
 
 int gQuitNow = 0;
@@ -42,8 +47,10 @@ int gTicks = 0;
 int gLastFPS = 0;
 int gFrameskip = 1;
 
+pcxImage_t *gDblBuf;
 unsigned char *gTitlePal;
 unsigned char *gGamePal;
+unsigned char gCurPal[768];
 
 RADPlayer gRadPlayer;
 volatile int gTimerCounter = 0;
@@ -57,6 +64,7 @@ pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
 pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 
 char gKeyDown[128];
+char gLastKeyDown;
 
 void handleTimer()
 {
@@ -104,11 +112,14 @@ void handleKeyboard()
   int scan = (int)inportb(0x60);
   char status = inportb(0x61);
 
-  if (scan & 0x80)
+  if (scan & 0x80) {
     gKeyDown[scan & 0x7f] = 0;
-  else
+    gLastKeyDown = scan & 0x7f;
+  }
+  else {
     gKeyDown[scan] = 1;
-  
+    gLastKeyDown = scan;
+  }
   outportb(0x61, status | 0x80);
   outportb(0x61, status);
   
@@ -195,8 +206,7 @@ void cleanup()
 
 void setPal(unsigned char *pal)
 {
- int j=0;
- int i;
+ int i, j=0;
  for (i=0; i < 768; i+=3, j++)
  {
   outportb(0x3C8, j);
@@ -204,6 +214,7 @@ void setPal(unsigned char *pal)
   outportb(0x3C9, pal[i+1]>>2);
   outportb(0x3C9, pal[i+2]>>2);
  }
+ memcpy(&gCurPal, pal, 768);
 }
 
 void drawSpriteSlow(pcxImage_t *src, unsigned char *dest, int x, int y)
@@ -228,7 +239,6 @@ void drawSpriteSlow(pcxImage_t *src, unsigned char *dest, int x, int y)
    r++;
   }
  }
-
 }
 
 
@@ -274,14 +284,13 @@ void blankPal() {
   setPal(pal);    
 }
 
-void menuToGame(pcxImage_t *dblBuf)
+void menuToGame()
 {
-  fadeOutPal(gTitlePal);
-  clearImage(dblBuf);
-  flip(dblBuf);
+  fadeOutPal();
+  clearImage(gDblBuf);
+  flip(gDblBuf);
   setPal(gGamePal);
-
-  // TODO
+  gCurScreen = gScreenGame;
 }
 
 
@@ -300,12 +309,12 @@ void fadeInPal(unsigned char pal[])
   }
 }
 
-void fadeOutPal(unsigned char pal[]) 
+void fadeOutPal() 
 {
   for (int j=0; j < 256; j+=4) {
     unsigned char p[768];
     for (int i=0; i < 768; i++) {
-      int x = pal[i] - j;
+      int x = gCurPal[i] - j;
       if (x < 0)
         x = 0;
       p[i] = x;
@@ -330,8 +339,11 @@ void fadePalToWhite(unsigned char pal[])
   }
 }
 
-void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
+void showRaceOver()
 {
+  gameState_t *state = (gameState_t*)gCurScreen.state;
+  pcxImage_t *dblBuf = gDblBuf;
+
   fadePalToWhite(gGamePal);
   unsigned char p[768];
   memset(p, 255, 768);
@@ -381,20 +393,18 @@ void showRaceOver(pcxImage_t *dblBuf, gameState_t *state)
   for (int i=0; i < 10*70; i++)
     waitVsync();
 
-  fadeOutPal(p);
+  fadeOutPal();
 }
 
-void showTitle(pcxImage_t *dblBuf)
+void showTitle()
 {
-  clearImage(dblBuf);
-//  setPal(gTitlePal);
+  clearImage(gDblBuf);
+  setPal(gTitlePal);
   blankPal();
-  blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
-  flip(dblBuf);
+  blitPCX(&gTitleImg, gDblBuf, 160-(gTitleImg.width>>1), 0);  
+  flip(gDblBuf);
   fadeInPal(gTitlePal);
-  blitFont(&gFontTiny, dblBuf->pixels, "DOSTEMBER GAMEJAM EDITION 1.1, NOVEMBER 2025 BY EXTENT OF THE JAM", 0, 0);
-  blitFont(&gFontMedium, dblBuf->pixels, "PRESS ACCELERATOR TO START", 0, 170);
-  blitFont(&gFontMedium, dblBuf->pixels, "ESC TO QUIT TO DOS", 0, 180);
+  gCurScreen = gScreenMenu;
 }
 
 void clearImage(pcxImage_t *p)
@@ -426,7 +436,7 @@ int main(int argc, char *argv[])
  for (i=0; i < dblBuf.height; i++)
    dblBuf.lines[i] = dblBuf.pixels + dblBuf.width*i;
 
-
+ gDblBuf = &dblBuf;
  gScreenGame.drawFn = doGameDraw;
  gScreenGame.logicFn = doGameLogic;
  gScreenGame.state = (void*)&gameState;
@@ -469,7 +479,8 @@ int main(int argc, char *argv[])
  triggerSfx(&gameState.sfxState, kSFX_Engine);
  gRadPlayer.SetSpeed(5);
 
-gCurScreen = gScreenMenu;
+ showTitle();
+
 
  while (!gQuitNow && !gameState.crossedFinish && gameState.gameOverCountdown != 0)
  {
@@ -516,10 +527,10 @@ writeConfig(&config);
 killSfx(&gameState.sfxState);
 
 if (!gQuitNow) {
-  showRaceOver(&dblBuf, &gameState);
+  showRaceOver();
 }
 else {  // ESC
-  fadeOutPal(gGamePal);
+  fadeOutPal();
 }
 
 

@@ -1,11 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 #include "menu.h"
-#include "pcxfont.h"
-
-extern char gKeyDown[128];
-extern pcxImage_t gTitleImg;
-extern pcxFont_t gFontDefault;
+#include "config.h"
 
 typedef enum mainMenu_t
 {
@@ -17,10 +14,33 @@ typedef enum mainMenu_t
     MENU_MAX
 }  mainMenu_t;
 
+char inKey() 
+{
+  while (!gLastKeyDown);
+  return gLastKeyDown;
+}
+
 void menuInit(menuState_t *state)
 {
   memset(state, 0, sizeof(menuState_t));
 }
+
+void showRecords(menuState_t *state)
+{
+  // TODO
+}
+
+void doReassignKeys(menuState_t *state)
+{
+  config_t *config;
+  config->keyLeft = inKey();
+  config->keyRight = inKey();
+  config->keyAccel = inKey();
+  config->keyBrake = inKey();
+  config->keyShiftUp = inKey();
+  config->keyShiftDn = inKey();
+}
+
 
 void doMenuLogic(void *s)
 {
@@ -53,16 +73,31 @@ void doMenuLogic(void *s)
   {
     state->keyNextItem = 0;
   }
+
+  if (gKeyDown[0x1C]) { // enter
+    switch (state->curIdx) {
+      case MENU_START:
+        menuToGame();
+        break;
+      case MENU_REDEFINE:
+        doReassignKeys(state);
+        break;
+      case MENU_RECORDS:
+        showRecords(state);
+        break;
+    }
+  }
 }
 
 void doMenuDraw(void *s, pcxImage_t *dblBuf)
 {
+  static const char* const menu[] = {"START", "REDEFINE KEYS", "RECORDS", "DOCS", "EXIT TO DOS"};
+  static const int kXMenu = 100;
+  static const int kYMenu = 120;
   menuState_t *state = (menuState_t*)s;
-  static const char* menu[] = {"START", "REDEFINE KEYS", "RECORDS", "DOCS", "EXIT TO DOS"};
-  static const int kXMenu = 50;
-  static const int kYMenu = 50;
 
-  memset(dblBuf->pixels, 1, 64000);
+  clearImage(dblBuf);
+  blitPCX(&gTitleImg, dblBuf, 160-(gTitleImg.width>>1), 0);  
 
   for (int i=0; i < MENU_MAX; i++) 
   {
@@ -73,3 +108,4 @@ void doMenuDraw(void *s, pcxImage_t *dblBuf)
     kXMenu - (gFontDefault.fontWidth<<1), 
     kYMenu + state->curIdx*gFontDefault.fontHeight);
 }
+
