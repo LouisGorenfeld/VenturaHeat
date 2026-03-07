@@ -3,6 +3,7 @@
 #include "records.h"
 
 #define KEY "roadv3projectvhjam2025"
+#define RECFILENAME "vheat.rec"
 
 void shift(char *data, int len, int unshift) 
 {
@@ -24,7 +25,7 @@ void refreshRecords(gameState_t *state)
 {
     for (int i=0; i <  MAX_STAGES; i++)
     {
-        if (state->bestLaptimes[i].time > state->laptimes[i]) {
+        if (state->bestLaptimes[i].time && state->bestLaptimes[i].time > state->laptimes[i]) {
             state->bestLaptimes[i].time = state->laptimes[i];
 
             // TODO: Let the player (PLR :)) enter their own initials
@@ -37,7 +38,7 @@ void refreshRecords(gameState_t *state)
 
 void loadRecords(gameState_t *state)
 {
-    FILE *fp = fopen("vh.rec", "rb");
+    FILE *fp = fopen(RECFILENAME, "rb");
     if (fp) 
     {
         if (fgetc(fp) != 'V' || fgetc(fp) != '0') {
@@ -66,15 +67,23 @@ void loadRecords(gameState_t *state)
     }
 }
 
+void writeRecord(lapRecord_t *rec, FILE *fp)
+{
+    fwrite(&rec->time, sizeof(int), 1, fp);
+    fwrite(rec->initials, 1, 3, fp);
+}
+
 void saveRecords(gameState_t *state)
 {
-    FILE *fp = fopen("vheat.rec", "wb");
+    FILE *fp = fopen(RECFILENAME, "wb");
     if (fp) 
     {
         fputc('V', fp);
         fputc('0', fp);
-        fwrite(state->bestLaptimes, sizeof(lapRecord_t),  MAX_STAGES, fp);
-        fwrite(&state->bestTotalTime, sizeof(lapRecord_t),  1, fp);
+        for (int i=0; i < MAX_STAGES; i++) {
+            writeRecord(&state->bestLaptimes[i], fp);
+        }
+        writeRecord(&state->bestTotalTime, fp);
         fflush(fp);
         fclose(fp);    
     }

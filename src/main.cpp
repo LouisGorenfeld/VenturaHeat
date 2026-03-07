@@ -412,6 +412,8 @@ void showRaceOver()
   for (int i=0; i < 2*70; i++) waitVsync();
 
   int dnf = 0;
+  
+  // TODO: Mark which ones are a new record
   for (int i=0; i < MAX_STAGES; i++) {
     int time = state->laptimes[i];
     float fTime = (float)time / 70.0f;
@@ -441,6 +443,9 @@ void showRaceOver()
     waitVsync();
 
   fadeOutPal();
+
+  // Save the user's records
+  refreshRecords(state);
 }
 
 void showTitle()
@@ -569,8 +574,6 @@ int main(int argc, char *argv[])
   doInput();
 }
 
-refreshRecords(&gameState);
-saveRecords(&gameState);
 writeConfig(&gConfig);
 killSfx(&gameState.sfxState);
 
@@ -578,6 +581,7 @@ fadeOutPal();
 
 cleanup();
 gRadPlayer.Stop();
+saveRecords(&gameState);
 
  return 0;
 }
