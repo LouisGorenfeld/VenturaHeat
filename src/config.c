@@ -16,10 +16,10 @@ void loadOrInitConfig(config_t *config) {
         memset(config, 0, sizeof(config_t));
         config->keyAccel = 0x48;    // up
         config->keyBrake = 0x50;    // down
-        config->keyLeft = 0x4b;     // left
-        config->keyRight = 0x3d;    // right
-        config->keyShiftUp = 0x48;  // a
-        config->keyShiftDn = 0x50;  // z
+        config->keyLeft = 0x4B;     // left
+        config->keyRight = 0x4D;    // right
+        config->keyShiftUp = 0x1E;  // a
+        config->keyShiftDn = 0x2C;  // z
     }
 }
 
