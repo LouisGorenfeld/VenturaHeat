@@ -26,9 +26,10 @@ extern int gLastFPS;
 
 pcxImage_t gCarHoodImg;
 
-void gameInit(gameState_t *state)
+void gameInit(gameState_t *state, config_t *config)
 {
   memset(state, 0, sizeof(gameState_t));
+  state->config = config;
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
   state->timeLeft = TIMESTART;
@@ -114,26 +115,28 @@ void plrEndShift(gameState_t *state)
 
 void doGameInputs(gameState_t *state)
 {
-    if (gKeyDown[0x4b]) // left
+    config_t *cfg = state->config;
+    
+    if (gKeyDown[cfg->keyLeft])
       plrSteer(state, -3);
-    else if (gKeyDown[0x4d]) // right
+    else if (gKeyDown[cfg->keyRight])
       plrSteer(state, 3);
     else
       plrAutocenter(state, 1);
 
-    if (gKeyDown[0x48]) // up
+    if (gKeyDown[cfg->keyAccel])
       plrGas(state, 255);
     else
       plrGas(state, 0);
 
-    if (gKeyDown[0x50]) // down
+    if (gKeyDown[cfg->keyBrake])
       plrBrake(state, 255);
     else
       plrBrake(state, 0);
 
-    if (gKeyDown[0x1E]) // A (shift up)
+    if (gKeyDown[cfg->keyShiftUp])
       plrStartShiftUp(state);
-    else if (gKeyDown[0x2C]) // Z (shift down)
+    else if (gKeyDown[cfg->keyShiftDn])
       plrStartShiftDn(state);
     else
       plrEndShift(state);

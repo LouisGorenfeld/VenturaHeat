@@ -68,7 +68,7 @@ void loadRecords(gameState_t *state)
 
 void saveRecords(gameState_t *state)
 {
-    FILE *fp = fopen("vh.cfg", "wb");
+    FILE *fp = fopen("vheat.rec", "wb");
     if (fp) 
     {
         fputc('V', fp);

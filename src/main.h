@@ -24,10 +24,12 @@ void showTitle();
 
 // Keyboard
 extern char gKeyDown[128];
-extern char gLastKeyDown;
+void waitForAllKeysReleased();
+char inKey();
 
 // Crap that should be in gfxstore
 extern pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
 extern pcxFont_t gFontTiny, gFontMedium, gFontDefault;
+extern pcxImage_t *gDblBuf;
 
 #endif

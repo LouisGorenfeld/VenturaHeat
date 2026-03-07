@@ -51,6 +51,7 @@ pcxImage_t *gDblBuf;
 unsigned char *gTitlePal;
 unsigned char *gGamePal;
 unsigned char gCurPal[768];
+config_t gConfig;
 
 RADPlayer gRadPlayer;
 volatile int gTimerCounter = 0;
@@ -64,7 +65,6 @@ pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
 pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 
 char gKeyDown[128];
-char gLastKeyDown;
 
 void handleTimer()
 {
@@ -114,11 +114,9 @@ void handleKeyboard()
 
   if (scan & 0x80) {
     gKeyDown[scan & 0x7f] = 0;
-    gLastKeyDown = scan & 0x7f;
   }
   else {
     gKeyDown[scan] = 1;
-    gLastKeyDown = scan;
   }
   outportb(0x61, status | 0x80);
   outportb(0x61, status);
@@ -142,6 +140,53 @@ void stopKeyboard()
     _go32_dpmi_set_protected_mode_interrupt_vector(9, &gOldKB);
 }
 
+void waitForAllKeysReleased()
+{
+  int anyKeyDown;
+  
+  do {
+    anyKeyDown = 0;
+    for (int i = 0; i < 128; i++) {
+      if (gKeyDown[i]) {
+        anyKeyDown = 1;
+        break;
+      }
+    }
+    if (anyKeyDown) {
+      waitVsync();
+    }
+  } while (anyKeyDown);
+}
+
+char inKey() 
+{
+  int i;
+  char key = 0;
+  
+  // Wait for any key to be pressed
+  while (1) {
+    for (i = 0; i < 128; i++) {
+      if (gKeyDown[i]) {
+        key = (char)i;
+        break;
+      }
+    }
+    if (key) break;
+    waitVsync();
+  }
+  
+  // Wait for that key to be released
+  while (gKeyDown[key]) {
+    waitVsync();
+  }
+  
+  // Small delay to debounce
+  for (i = 0; i < 10; i++) {
+    waitVsync();
+  }
+
+  return key;
+}
 
 
 
@@ -290,7 +335,9 @@ void menuToGame()
   clearImage(gDblBuf);
   flip(gDblBuf);
   setPal(gGamePal);
+
   gCurScreen = gScreenGame;
+  gameInit((gameState_t*)gCurScreen.state, &gConfig);
 }
 
 
@@ -404,7 +451,9 @@ void showTitle()
   blitPCX(&gTitleImg, gDblBuf, 160-(gTitleImg.width>>1), 0);  
   flip(gDblBuf);
   fadeInPal(gTitlePal);
+
   gCurScreen = gScreenMenu;
+  // Note: menuInit already called in main() with config pointer
 }
 
 void clearImage(pcxImage_t *p)
@@ -417,7 +466,6 @@ int main(int argc, char *argv[])
  int i;
  gameState_t gameState;
  menuState_t menuState;
- config_t config;
  pcxImage_t fontImg, fontMediumImg, fontDefaultImg, tex1;
  pcxImage_t dblBuf;
 
@@ -445,13 +493,13 @@ int main(int argc, char *argv[])
  gScreenMenu.logicFn = doMenuLogic;
  gScreenMenu.state = (void*)&menuState;
 
- loadOrInitConfig(&config);
+ loadOrInitConfig(&gConfig);
 
  loadRAD();
 
  loadGfx();
- gameInit(&gameState);
- menuInit(&menuState);
+ gameInit(&gameState, &gConfig);
+ menuInit(&menuState, &gConfig);
  loadRecords(&gameState);
 
  loadPCX(&fontImg, data_font4x5);
@@ -482,7 +530,7 @@ int main(int argc, char *argv[])
  showTitle();
 
 
- while (!gQuitNow && !gameState.crossedFinish && gameState.gameOverCountdown != 0)
+ while (!gQuitNow)
  {
 
   if (!gFrameskip) {
@@ -523,17 +571,10 @@ int main(int argc, char *argv[])
 
 refreshRecords(&gameState);
 saveRecords(&gameState);
-writeConfig(&config);
+writeConfig(&gConfig);
 killSfx(&gameState.sfxState);
 
-if (!gQuitNow) {
-  showRaceOver();
-}
-else {  // ESC
-  fadeOutPal();
-}
-
-
+fadeOutPal();
 
 cleanup();
 gRadPlayer.Stop();

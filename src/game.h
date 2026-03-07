@@ -3,6 +3,7 @@
 #include "road.h"
 #include "loadpcx.h"
 #include "sfx.h"
+#include "config.h"
 
 // This module is a lot of the overarching game logic
 
@@ -62,10 +63,12 @@ typedef struct gameState_t
   lapRecord_t bestLaptimes[MAX_STAGES];
   lapRecord_t bestTotalTime;
 
+  config_t *config;
+
 } gameState_t;
 
 
-void gameInit(gameState_t *state);
+void gameInit(gameState_t *state, config_t *config);
 
 void doGameLogic(void *state);
 
