@@ -446,6 +446,8 @@ void showRaceOver()
 
   // Save the user's records
   refreshRecords(state);
+
+  showTitle();
 }
 
 void showTitle()

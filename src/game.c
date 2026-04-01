@@ -449,6 +449,9 @@ void doGameLogic(void *s)
     state->msg = "GAME OVER";
     state->msgBlinkMask = 0;
     state->msgCountdown = 70*3;
+    for (int i=0; i < 2*70; i++) 
+      waitVsync();
+    showRaceOver();
     state->gameOverCountdown = state->msgCountdown;
   }
 
