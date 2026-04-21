@@ -61,7 +61,7 @@ _go32_dpmi_seginfo gOldKB, gNewKB;
 
 FILE *gLogFP = 0;
 
-pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
+pcxImage_t gTitleImg, gFontDigiImg, gTachImg, gCountInImgs[4];
 pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 
 char gKeyDown[128];
@@ -505,7 +505,6 @@ int main(int argc, char *argv[])
  loadRAD();
 
  loadGfx();
- gameInit(&gameState, &gConfig);
  menuInit(&menuState, &gConfig);
  loadRecords(&gameState);
 
@@ -521,6 +520,10 @@ int main(int argc, char *argv[])
  loadPCX(&gFontDigiImg, data_diginums);
 
  loadPCX(&gTachImg, data_digitach);
+ loadPCX(&gCountInImgs[0], data_countin0);
+ loadPCX(&gCountInImgs[1], data_countin1);
+ loadPCX(&gCountInImgs[2], data_countin2);
+ loadPCX(&gCountInImgs[3], data_countin3);
 
  loadPCX(&gTitleImg, data_vhlogo);
 
@@ -539,7 +542,6 @@ int main(int argc, char *argv[])
 
  while (!gQuitNow)
  {
-
   if (!gFrameskip) {
     gCurScreen.logicFn(gCurScreen.state); 
     gCurScreen.drawFn(gCurScreen.state, &dblBuf);

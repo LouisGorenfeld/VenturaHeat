@@ -56,6 +56,7 @@ typedef struct gameState_t
   int totaltime;
   int crashes;
 
+  int startRaceCountdown;   // 3..2..1..go!
   int gameOverCountdown;
   int crossedFinish;
 

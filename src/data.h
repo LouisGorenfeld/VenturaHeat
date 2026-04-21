@@ -28,6 +28,11 @@ extern unsigned char data_cactus[];
 extern unsigned char data_vhlogo[];
 extern unsigned char data_beactex2[];
 extern unsigned char data_mudtex1[];
+extern unsigned char data_countin3[];
+extern unsigned char data_countin2[];
+extern unsigned char data_countin1[];
+extern unsigned char data_countin0[];
+
 
 //data_dither.c
 //data_rcheckp.c

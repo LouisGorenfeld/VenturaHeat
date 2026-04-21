@@ -28,7 +28,7 @@ void waitForAllKeysReleased();
 char inKey();
 
 // Crap that should be in gfxstore
-extern pcxImage_t gTitleImg, gFontDigiImg, gTachImg;
+extern pcxImage_t gTitleImg, gFontDigiImg, gTachImg, gCountInImgs[4];
 extern pcxFont_t gFontTiny, gFontMedium, gFontDefault;
 extern pcxImage_t *gDblBuf;
 

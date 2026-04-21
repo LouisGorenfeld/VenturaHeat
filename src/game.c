@@ -24,7 +24,14 @@ extern int gLastFPS;
 #define TIMESTART 70*70
 #define TIMEBONUS 60*70
 
+#define COUNTDOWNPRE 2*70 // 2 seconds before countdown starts
+#define COUNTDOWNPHASELEN 70 // 1 second per beep (3, 2, 1, GO!)
+#define COUNTDOWNTOTAL (COUNTDOWNPRE + (COUNTDOWNPHASELEN * 4))
+
 pcxImage_t gCarHoodImg;
+
+void plrStartShiftDn(gameState_t *state);
+
 
 void gameInit(gameState_t *state, config_t *config)
 {
@@ -32,8 +39,13 @@ void gameInit(gameState_t *state, config_t *config)
   state->config = config;
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
+
+  // Start with clutch in because it acts just like neutral
+  plrStartShiftDn(state);
+
   state->timeLeft = TIMESTART;
   state->gameOverCountdown = -1;
+  state->startRaceCountdown = COUNTDOWNTOTAL;
 
   loadPCX(&gCarHoodImg, data_carhood);
 }
@@ -134,12 +146,19 @@ void doGameInputs(gameState_t *state)
     else
       plrBrake(state, 0);
 
-    if (gKeyDown[cfg->keyShiftUp])
-      plrStartShiftUp(state);
-    else if (gKeyDown[cfg->keyShiftDn])
-      plrStartShiftDn(state);
-    else
-      plrEndShift(state);
+      // During count-in, the engine is in neutral, so it acts as if the clutch is in
+    if (state->startRaceCountdown) {
+      if (state->startRaceCountdown <= COUNTDOWNPHASELEN /* GO! */)
+        plrEndShift(state);
+    }
+    else {
+      if (gKeyDown[cfg->keyShiftUp])
+        plrStartShiftUp(state);
+      else if (gKeyDown[cfg->keyShiftDn])
+        plrStartShiftDn(state);
+      else
+        plrEndShift(state);
+    }
 }
 
 void doCurvePhysics(gameState_t *state)
@@ -219,7 +238,12 @@ void doGearBox(plrCar_t *car, plrCtrls_t *ctrls)
   }
   else
   {
-    car->rpms += (800 * gas) >> 9;
+    if (gas) {
+      car->rpms += (800 * gas) >> 9;
+    }
+    else {
+      car->rpms = .97 * car->rpms + .03;
+    }
   }
 
   if (car->rpms >= OVERRPMS)
@@ -338,6 +362,9 @@ void doGameLogic(void *s)
 
   doGameInputs(state);
 
+  if (state->startRaceCountdown)
+    state->startRaceCountdown--;
+
   // TODO: There are still some lack-of-precision issues here, so perhaps
   // keep speed in MPH fixed point and save the rightshift
 
@@ -437,7 +464,7 @@ void doGameLogic(void *s)
 
   doCarGeneration(state);
 
-  if (state->timeLeft > 0) {
+  if (state->timeLeft > 0 && !state->startRaceCountdown) {
     state->timeLeft--;
     if (state->timeLeft == 10*70) {
       state->msg = "TIME IS RUNNING OUT";
@@ -572,6 +599,14 @@ void doGameDraw(void *s, pcxImage_t *buf)
   int cx = (float)gTachImg.width * (float)state->plrCar.rpms / (float)OVERRPMS;
   if (cx) {
     blitPCXClip(&gTachImg, buf, 24*4, 8, 0, 0, cx, gTachImg.height);
+  }
+
+  if (state->startRaceCountdown) {// && state->startingCountdown < COUNTDOWNTOTAL - COUNTDOWNPRE) {
+    int phase = state->startRaceCountdown / COUNTDOWNPHASELEN;
+    if (phase < 4) {
+      pcxImage_t *countInImg = gCountInImgs + phase; 
+      blitPCXSprite(countInImg, buf, 160-(countInImg->width>>1), 72);
+    }
   }
 
   // TODO: We really might want to make a compatible font ..
