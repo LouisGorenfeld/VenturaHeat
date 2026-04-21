@@ -39,6 +39,7 @@ void gameInit(gameState_t *state, config_t *config)
   state->config = config;
   roadCtlInit(&state->roadCtlr);
   initPlrCar(&state->plrCar);
+  triggerSfx(&state->sfxState, kSFX_Engine);
 
   // Start with clutch in because it acts just like neutral
   plrStartShiftDn(state);
