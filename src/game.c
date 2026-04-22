@@ -602,11 +602,19 @@ void doGameDraw(void *s, pcxImage_t *buf)
     blitPCXClip(&gTachImg, buf, 24*4, 8, 0, 0, cx, gTachImg.height);
   }
 
-  if (state->startRaceCountdown) {// && state->startingCountdown < COUNTDOWNTOTAL - COUNTDOWNPRE) {
+  if (state->startRaceCountdown) {
     int phase = state->startRaceCountdown / COUNTDOWNPHASELEN;
     if (phase < 4) {
       pcxImage_t *countInImg = gCountInImgs + phase; 
-      blitPCXSprite(countInImg, buf, 160-(countInImg->width>>1), 72);
+      fixed_t scale = COUNTDOWNPHASELEN - ((state->startRaceCountdown % COUNTDOWNPHASELEN)<<9);
+      scale += ITOFIX(1);
+
+      fixed_t scaledWidth = scale * countInImg->width;
+      fixed_t scaledHeight = scale * countInImg->height;
+
+      int x = 160 - (FIXTOI(scaledWidth)>>1);
+      int y = 72 - (FIXTOI(scaledHeight)>>1); 
+      blitPCXScaledSprite(countInImg, buf, x, y, scale, scale, 200);
     }
   }
 
