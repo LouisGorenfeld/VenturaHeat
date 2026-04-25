@@ -446,7 +446,7 @@ void showRaceOver()
 
   // Save the user's records
   refreshRecords(state);
-
+  saveRecords(state);
   showTitle();
 }
 
@@ -534,7 +534,6 @@ int main(int argc, char *argv[])
  startTimer(70);
 
  // Start engine!
- triggerSfx(&gameState.sfxState, kSFX_Engine);
  gRadPlayer.SetSpeed(5);
 
  showTitle();

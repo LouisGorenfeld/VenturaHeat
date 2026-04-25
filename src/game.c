@@ -21,14 +21,17 @@ extern int gLastFPS;
 #define MAXSTEER 256
 #define SPEEDLOSS FTOFIX(.25) // speed is multiplied against this in a crash; 16.16 fixed point
 
-#define TIMESTART 70*70
-#define TIMEBONUS 60*70
+#define TIMESTART 75*70
+#define TIMEBONUS 60*70     // Time bonus when checkpoint crossed
+#define TIMEFORCAPSULE 5    // If the user collects a time bonus
 
 #define COUNTDOWNPRE 2*70 // 2 seconds before countdown starts
 #define COUNTDOWNPHASELEN 70 // 1 second per beep (3, 2, 1, GO!)
 #define COUNTDOWNTOTAL (COUNTDOWNPRE + (COUNTDOWNPHASELEN * 4))
 
 pcxImage_t gCarHoodImg;
+
+char gMsgScratch[128];
 
 void plrStartShiftDn(gameState_t *state);
 
@@ -392,6 +395,17 @@ void doGameLogic(void *s)
       state->msg = "TIME EXTENDED";
       state->msgBlinkMask = 1;
       state->msgCountdown = 70*2;
+      int time = state->laptimes[state->roadCtlr.curStage];
+      float fTime = (float)time / 70.0f;
+      // TODO: Queue this up instead of displaying it below
+      if (time < state->bestLaptimes[state->roadCtlr.curStage].time) {
+          sprintf(gMsgScratch, "NEW RECORD %f sec", fTime);
+      }
+      else {
+          sprintf(gMsgScratch, "%f sec", fTime);
+      }
+      state->msg2 = gMsgScratch;
+
       state->timeLeft += TIMEBONUS;
       if (state->timeLeft > TIMESTART)
         state->timeLeft = TIMESTART;
@@ -590,9 +604,15 @@ void doGameDraw(void *s, pcxImage_t *buf)
   blitPCXSprite(&gCarHoodImg, buf, 0,
                 buf->height - gCarHoodImg.height - (state->kaThump&2) - FIXTOI(state->hoodDuck)
   );
-  if (state->msg && state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
-    int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
-    blitFont(&gFontMedium, buf->pixels, state->msg, x, 70);
+  if (state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
+    if (state->msg) {
+      int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
+      blitFont(&gFontMedium, buf->pixels, state->msg, x, 70);
+    }
+    if (state->msg2) {
+      int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
+      blitFont(&gFontMedium, buf->pixels, state->msg2, x, 70+12);
+    }
   }
 
   // Draw the HUD

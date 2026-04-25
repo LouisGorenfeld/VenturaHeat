@@ -51,7 +51,7 @@ typedef struct gameState_t
   int msgCountdown;
   int msgBlinkMask;
   
-  int laptimes[MAX_STAGES];
+  int laptimes[MAX_STAGES];   // Live, current laptimes
   int curLaptime;
   int totaltime;
   int crashes;
@@ -60,7 +60,7 @@ typedef struct gameState_t
   int gameOverCountdown;
   int crossedFinish;
 
-
+  // The current best times, unmodified until game over
   lapRecord_t bestLaptimes[MAX_STAGES];
   lapRecord_t bestTotalTime;
 
