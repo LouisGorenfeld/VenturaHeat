@@ -17,8 +17,6 @@
 #define MEDHILL_D -100
 //#define SHARPHILL 1000
 
-// HORIZON NEEDS TO RISE/SINK MORE TO SELL THE ILLUSION
-
 char *parseTexChange(roadCtlr_t *ctlr, char *ch);
 
 void roadCtlInit(roadCtlr_t *ctlr)
@@ -40,8 +38,10 @@ void roadCtlInit(roadCtlr_t *ctlr)
 
 
 */
-  ctlr->stage[0].cmd = "D,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
-  ctlr->stage[1].cmd = "T(24),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
+  ctlr->stage[0].cmd = "_";
+//  ctlr->stage[0].cmd = "D,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
+  ctlr->stage[1].cmd = "_,l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
+//  ctlr->stage[1].cmd = "T(24),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
   ctlr->stage[2].cmd = "T(02),d,l,u,dr,u,d,_,l,r,L,L,u,d,r,R,ru,u,_,_,_"; 
 
   ctlr->stage[3].cmd = "T(03),T(23),_,_,_,u,_,l,l,d,_,d,d,u,l,r,_,_,_";
@@ -60,13 +60,17 @@ void roadCtlInit(roadCtlr_t *ctlr)
   roadCtlSetTexture(ctlr, TEXLOC_LEFT, getSideTex(0));
   roadCtlSetTexture(ctlr, TEXLOC_RIGHT, getSideTex(0));
 
-  ctlr->scenIndex1[0] = 2;  // Left side
-  ctlr->scenIndex2[0] = 3;
-  ctlr->scenIndex1[1] = -1; // No randomized features on road yet
-  ctlr->scenIndex2[1] = -1;
-  ctlr->scenIndex1[2] = 2;  // Right side
-  ctlr->scenIndex2[2] = 3;
+  ctlr->scenIndex1[0] = SCENINDEX_BUSH;
+  ctlr->scenIndex2[0] = SCENINDEX_BARETREE;
+  ctlr->scenIndex1[1] = SCENINDEX_NONE;
+  ctlr->scenIndex2[1] = SCENINDEX_NONE;
+  ctlr->scenIndex1[2] = SCENINDEX_BUSH;
+  ctlr->scenIndex2[2] = SCENINDEX_BARETREE;
   
+//  roadCtlAddSceneryChange(ctlr, 0, ZFARPLANE>>1, getRoadTex(2));
+//  roadCtlAddSceneryChange(ctlr, 0, (ZFARPLANE>>1)+128, getRoadTex(1));
+
+
   // TODO: Hack for now. Horizon location will change anyway
   ctlr->roadDef.horizonTex = getHorizonTex(0);
   ctlr->roadLive.yOffsetHorizon = ITOFIX(ctlr->roadDef.horizonTex->height >> 2);
@@ -76,56 +80,50 @@ char *parseTexChange(roadCtlr_t *ctlr, char *ch)
 {
   int side;
   int tex;
+  pcxImage_t *img;
+  
   ch++;
   assert(*ch == '(');
   ch++;
   assert(*ch >= '0' && *ch <= '9');
-  side = *ch - '0' - 1; // -1, 0, 1 as roadCtlAddCar expects
-  // TODO, maybe just use 0 1 2 for everything?
+  side = *ch - '0' - 1;
   ch++;
   assert(*ch >= '0' && *ch <= '9');
   tex = *ch - '0';
   ch++;
   assert(*ch == ')');
 
-  roadCtlAddCar(ctlr, side, ZFARPLANE-1, 0, CARTYPE_DUMMY_SCEN, tex);
+  if (side == 0)
+    img = getRoadTex(tex);
+  else
+    img = getSideTex(tex);
 
-  // Switch scenery over immediately, based on texture number:
-  // 0 = grass
-  // 1 = ice
-  // 2 = beach
-  // 3 = sand
-  // 4 = mud
+  roadCtlAddSceneryChange(ctlr, side, ZFARPLANE-1, img);
+
   if (tex == 0) {
-    // Bushes and bare tree    
-    ctlr->scenIndex1[side + 1] = 2;
-    ctlr->scenIndex2[side + 1] = 3;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_BUSH;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_BARETREE;
   }
   else if (tex == 1) {
-    // Bare tree
-    ctlr->scenIndex1[side + 1] = 2;
-    ctlr->scenIndex2[side + 1] = 2;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_BARETREE;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_BARETREE;
   }
   else if (tex == 2) {
-    // No beach scenery
-    ctlr->scenIndex1[side + 1] = -1;
-    ctlr->scenIndex2[side + 1] = -1;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_NONE;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_NONE;
   }
   else if (tex == 3) {
-    // Cactus and bushes
-    ctlr->scenIndex1[side + 1] = 5;
-    ctlr->scenIndex2[side + 1] = 3;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_CACTUS;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_BUSH;
   }
   else if (tex == 4) {
-    // Only bushes
-    ctlr->scenIndex1[side + 1] = 3;
-    ctlr->scenIndex2[side + 1] = 3;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_BUSH;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_BUSH;
   }
   else {
-    ctlr->scenIndex1[side + 1] = -1;
-    ctlr->scenIndex2[side + 1] = -1;
+    ctlr->scenIndex1[side + 1] = SCENINDEX_NONE;
+    ctlr->scenIndex2[side + 1] = SCENINDEX_NONE;
   }
-  
 
   return ch;
 }
@@ -232,6 +230,10 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
   {
     live->segPos -= ZMAPLEN<<16;
     nextStageLoaded = parseCommand(ctlr);
+    if (nextStageLoaded) {
+      roadCtlAddSceneryChange(ctlr, 0, ZFARPLANE, getRoadTex(2));
+      roadCtlAddSceneryChange(ctlr, 0, (ZFARPLANE+512), live->roadTex);
+    }
   }
 
   
@@ -240,7 +242,7 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
 
 
-  // TODO: We may want a CarCtlr if car logic starts dominating this module
+  // TODO: We may want a CarCtlr if car logic starts dominating this module 
   for (i=0; i < MAXCARS; i++)
   {
     if (ctlr->carActive[i])
@@ -259,35 +261,33 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
     ctlr->zCounterScenery += ZSCENSPACING;
 
-    // There's a specific priority here, where the upcoming curve
-    // gets priority over signs describing the current curve
     if (nextCmd == 'L' || nextCmd == 'h')
     {
-        roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
+        roadCtlAddCarObject(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
     }
     else if (nextCmd == 'R' || nextCmd == 'H')
     {
-        roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
+        roadCtlAddCarObject(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
     }
     else if (curCmd == 'L' || curCmd == 'h') 
     {
-        roadCtlAddCar(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
+        roadCtlAddCarObject(ctlr, 85536, ZFARPLANE-1, 0, CARTYPE_LCHEV, -1);
     }
     else if (curCmd == 'R' || curCmd == 'H') 
     {
-        roadCtlAddCar(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
+        roadCtlAddCarObject(ctlr, -85536, ZFARPLANE-1, 0, CARTYPE_RCHEV, -1);
     }
     else
     {
-      // Randomized scenery
-      int sideSlot = rand() & 1? 0 : 2;  // TODO: occasional something on road? We only do sides rn
+      int sideSlot = rand() & 1? 0 : 2;
       int gfxIndex = rand() & 1? ctlr->scenIndex1[sideSlot] : ctlr->scenIndex2[sideSlot];
 
-      if (gfxIndex >= 0) {
+      if (gfxIndex != SCENINDEX_NONE) {
+        pcxImage_t *scenImg = getScenTex(gfxIndex);
         if (sideSlot == 0)
-          roadCtlAddCar(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+          roadCtlAddScenery(ctlr, 85536 + (rand() & 131071), ZFARPLANE-1, scenImg);
         else if (sideSlot == 2)
-          roadCtlAddCar(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, 0, CARTYPE_TREE, gfxIndex);
+          roadCtlAddScenery(ctlr, -85536 - (rand() & 131071), ZFARPLANE-1, scenImg);
       }
     }
   }
@@ -317,9 +317,6 @@ int roadCtlScroll(roadCtlr_t *ctlr, short zAmt)
 
 void roadCtlSetTexture(roadCtlr_t *ctrl, texLoc_t loc, pcxImage_t *img)
 {
-  // Eventually these will start at maximum z and come towards
-  // the camera. For now, the road just supports changing the texture
-  // in its entirety
   switch (loc)
   {
     case TEXLOC_LEFT:   ctrl->roadLive.sideTex[0] = img;    break;
@@ -330,9 +327,12 @@ void roadCtlSetTexture(roadCtlr_t *ctrl, texLoc_t loc, pcxImage_t *img)
   }
 }
 
-void roadCtlCarLogic(roadCtlr_t *ctlr)
+// TODO: This is awkward. Cull+checkpoint logic probably belongs with road scrolling
+int roadCtlCarLogic(roadCtlr_t *ctlr) // 1=checkpoint hit, 0=no checkpoint hit
 {
   int i;
+  int checkpointHit=0;
+
   for (i=0; i < MAXCARS; i++)
   {
     if (ctlr->carActive[i])
@@ -349,16 +349,23 @@ void roadCtlCarLogic(roadCtlr_t *ctlr)
         // Set scenery. This has to be done before it gets clipped.
         if (car->roadObj.car->type == CARTYPE_DUMMY_SCEN)
         {
-          if (car->roadObj.x == 0)
+          if (car->roadObj.x == 0) {
             ctlr->roadLive.roadTex = car->roadObj.img;
-          else if (car->roadObj.x == -1)
+            if (ctlr->roadLive.roadTex == getRoadTex(2));
+              checkpointHit = 1;
+          }
+          else if (car->roadObj.x == -1) {
             ctlr->roadLive.sideTex[0] = car->roadObj.img;
-          else if (car->roadObj.x == 1)
+          }
+            else if (car->roadObj.x == 1) {
             ctlr->roadLive.sideTex[1] = car->roadObj.img;
+          }
         } 
       }
     }
   }
+
+  return checkpointHit;
 }
 
 void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
@@ -370,36 +377,25 @@ void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank)
     32767
   };
 
-  // Make sure the farthest car's z >= minZdistance from the end
-  fixed_t speed = ITOFIX(175);// ITOFIX((rank+1) * 65 + 5);
+  fixed_t speed = ITOFIX(175);
 
-  // Roll one of these patterns for the 3 lanes:
-  // 1 2 3
-  // -
-  //   -
-  //     -
-  // -   - <-- staggered
-    int pattern = rand() & 3;
-    int texNum = (rand() & 1)? 1 : 4;
-    car_t *car;
-    speed += ITOFIX(rand() & 31);
-    if (pattern == 3) {
-        fixed_t z = ZFARPLANE-1;
-        int lane = rand() % 3;
-        car = roadCtlAddCar(ctlr, laneXs[lane], z, speed, CARTYPE_COUPE, texNum);
-        lane = (lane + 1) % 3;
-        car = roadCtlAddCar(ctlr, laneXs[lane], z - 512, speed, CARTYPE_COUPE, texNum);
-    }
-    else {
-        const int lane = pattern;      
-        // Left lane gets a speed boost
-        if (lane == 0)
-          speed += ITOFIX(20);
-        car = roadCtlAddCar(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, texNum);
-    }
-
-  // If rank is > 3, you start getting ambulances in the right lane
-  // Prereq: rear view mirror 
+  int pattern = rand() & 3;
+  int texNum = (rand() & 1)? 1 : 4;
+  car_t *car;
+  speed += ITOFIX(rand() & 31);
+  if (pattern == 3) {
+      fixed_t z = ZFARPLANE-1;
+      int lane = rand() % 3;
+      car = roadCtlAddCarObject(ctlr, laneXs[lane], z, speed, CARTYPE_COUPE, texNum);
+      lane = (lane + 1) % 3;
+      car = roadCtlAddCarObject(ctlr, laneXs[lane], z - 512, speed, CARTYPE_COUPE, texNum);
+  }
+  else {
+      const int lane = pattern;
+      if (lane == 0)
+        speed += ITOFIX(20);
+      car = roadCtlAddCarObject(ctlr, laneXs[lane], ZFARPLANE-1, speed, CARTYPE_COUPE, texNum);
+  }
 } 
 
 void roadCtlRollEvent(roadCtlr_t, int rank)
@@ -409,13 +405,11 @@ void roadCtlRollEvent(roadCtlr_t, int rank)
   // Right lane out
 }
 
-// TODO We might want to wrap this in addScenaryObject and addCarObject and this becomes addRoadObject
-car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
+static car_t *roadCtlAddRoadObj(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
 {
   int i;
   car_t *car;
 
-  // Find next free spot
   for (i=0; i < MAXCARS; i++)
   {
     if (ctlr->carActive[i] == 0)
@@ -427,12 +421,34 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
     return 0;
   
   car = ctlr->cars + i;
-  car->roadObj.car = car;   // Make sure we can get back to ourself easily
-
-  // TODO: Texnum for cars can be transformed into texNum*3, for texNum + offset, where offset
-  // is 0=left-angled, 1=centered, 2=right-angled
+  car->roadObj.car = car;
   initCar(car, x, z, speed, type, texNum);
-  if (type != CARTYPE_DUMMY_SCEN) {
+  linkRoadObj(&ctlr->roadLive, &car->roadObj);
+  ctlr->carActive[i] = 1;
+
+  return car;
+}
+
+car_t *roadCtlAddScenery(roadCtlr_t *ctlr, fixed_t x, int z, pcxImage_t *img)
+{
+  car_t *car = roadCtlAddRoadObj(ctlr, x, z, 0, CARTYPE_TREE, -1);
+  if (car)
+    car->roadObj.img = img;
+  return car;
+}
+
+car_t *roadCtlAddSceneryChange(roadCtlr_t *ctlr, fixed_t x, int z, pcxImage_t *img)
+{
+  car_t *car = roadCtlAddRoadObj(ctlr, x, z, 0, CARTYPE_DUMMY_SCEN, -1);
+  if (car)
+    car->roadObj.img = img;
+  return car;
+}
+
+car_t *roadCtlAddCarObject(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
+{
+  car_t *car = roadCtlAddRoadObj(ctlr, x, z, speed, type, texNum);
+  if (car) {
     if (type == CARTYPE_LCHEV)
       car->roadObj.img = getCarTex(car->texNum, CARGFX_LEFT); 
     else if (type == CARTYPE_RCHEV)
@@ -440,18 +456,25 @@ car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_
     else
       car->roadObj.img = getCarTex(car->texNum, CARGFX_CENTER);
   }
-  else {
-    if (x == 0)
-      car->roadObj.img = getRoadTex(car->texNum);
-    else 
-      car->roadObj.img = getSideTex(car->texNum);
-  }
-
-  // Add it to the display list
-  linkRoadObj(&ctlr->roadLive, &car->roadObj);
-  ctlr->carActive[i] = 1;
-
   return car;
+}
+
+car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum)
+{
+  if (type == CARTYPE_DUMMY_SCEN) {
+    pcxImage_t *img;
+    if (x == 0)
+      img = getRoadTex(texNum);
+    else 
+      img = getSideTex(texNum);
+    return roadCtlAddSceneryChange(ctlr, x, z, img);
+  }
+  else if (type == CARTYPE_TREE) {
+    return roadCtlAddScenery(ctlr, x, z, getScenTex(texNum));
+  }
+  else {
+    return roadCtlAddCarObject(ctlr, x, z, speed, type, texNum);
+  }
 }
 
 void roadCtlRemoveCar(roadCtlr_t *ctlr, car_t *car)

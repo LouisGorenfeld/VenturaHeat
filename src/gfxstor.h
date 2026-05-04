@@ -20,6 +20,7 @@ typedef struct carGfx_t
 
 void loadGfx();
 pcxImage_t *getCarTex(int index, carGfxFacing_t facing);
+pcxImage_t *getScenTex(int index);
 pcxImage_t *getSideTex(int index);
 pcxImage_t *getRoadTex(int index);
 pcxImage_t *getHorizonTex(int index);

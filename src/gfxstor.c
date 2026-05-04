@@ -84,6 +84,11 @@ pcxImage_t *getCarTex(int index, carGfxFacing_t facing)
   return &cg->images[facing];
 }
 
+pcxImage_t *getScenTex(int index)
+{
+  return getCarTex(index, CARGFX_CENTER);
+}
+
 pcxImage_t *getSideTex(int index)
 {
   return &gGfxStore.sideTex[index];

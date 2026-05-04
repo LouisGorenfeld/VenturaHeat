@@ -351,6 +351,29 @@ void checkObjCollisions(gameState_t *state)
   }
 }
 
+void doTimeExtend(gameState_t *state) 
+{
+  int time = state->laptimes[state->roadCtlr.curStage];
+  float fTime = (float)time / 70.0f;
+  // TODO: Queue this up instead of displaying it below
+  if (time < state->bestLaptimes[state->roadCtlr.curStage].time) {
+      sprintf(gMsgScratch, "NEW RECORD %f sec", fTime);
+  }
+  else {
+      sprintf(gMsgScratch, "%f sec", fTime);
+  }
+  state->msg2 = gMsgScratch;
+
+  state->timeLeft += TIMEBONUS;
+  if (state->timeLeft > TIMESTART)
+    state->timeLeft = TIMESTART;
+
+  triggerSfx(&state->sfxState, kSFX_Extend);
+  state->msg = "TIME EXTENDED";  
+  state->msgBlinkMask = 1;
+  state->msgCountdown = 70*2;
+}
+
 void doGameLogic(void *s)
 {
   gameState_t *state = (gameState_t*)s;
@@ -383,6 +406,8 @@ void doGameLogic(void *s)
     
   int nextStageLoaded = roadCtlScroll(&state->roadCtlr, zScroll);
   if (nextStageLoaded) {
+  // TODO: One approach might be to store nextStageLoaded in the struct; I think this is early to
+  // call the finish line crossed here (see the checkpoint generation code) 
     state->laptimes[state->roadCtlr.curStage - 1] = state->curLaptime;
     state->curLaptime = 0;
 
@@ -390,28 +415,10 @@ void doGameLogic(void *s)
       state->crossedFinish = 1;
       return; // Early return and don't call us back
     }
-    else {
-      triggerSfx(&state->sfxState, kSFX_Extend);
-      state->msg = "TIME EXTENDED";
-      state->msgBlinkMask = 1;
-      state->msgCountdown = 70*2;
-      int time = state->laptimes[state->roadCtlr.curStage];
-      float fTime = (float)time / 70.0f;
-      // TODO: Queue this up instead of displaying it below
-      if (time < state->bestLaptimes[state->roadCtlr.curStage].time) {
-          sprintf(gMsgScratch, "NEW RECORD %f sec", fTime);
-      }
-      else {
-          sprintf(gMsgScratch, "%f sec", fTime);
-      }
-      state->msg2 = gMsgScratch;
-
-      state->timeLeft += TIMEBONUS;
-      if (state->timeLeft > TIMESTART)
-        state->timeLeft = TIMESTART;
-    }
   }
-  roadCtlCarLogic(&state->roadCtlr);
+  int crossedCheckpoint = roadCtlCarLogic(&state->roadCtlr);
+  if (crossedCheckpoint)
+    doTimeExtend(state);
 
   doGearBox(&state->plrCar, &state->plrCtrls);
   int freq = 50 + ((state->plrCar.rpms) >> 3);

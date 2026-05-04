@@ -30,6 +30,14 @@
 
 #define MAXCARS 128
 
+typedef enum scenIndex_t
+{
+  SCENINDEX_NONE = -1,
+  SCENINDEX_BARETREE = 2,
+  SCENINDEX_BUSH = 3,
+  SCENINDEX_CACTUS = 5
+} scenIndex_t;
+
 // The range where objects are dropped off the map
 // 8192: Two "screens" ahead (0-4096 being "in front")
 #define ZFARCULL 8192 
@@ -93,16 +101,17 @@ typedef enum texLoc_t
 
 // Positive scrolls towards camera. Returns true if next stage has been loaded
 int roadCtlScroll(roadCtlr_t *ctlr, short zAmt);
-void roadCtlCarLogic(roadCtlr_t *ctlr);
+int roadCtlCarLogic(roadCtlr_t *ctlr); // 1=checkpoint hit, 0=no checkpoint hit
 void roadCtlDraw(roadCtlr_t *ctlr, unsigned char *dest);
 void roadCtlInit(roadCtlr_t *ctlr);
 // Direct set texture call
 void roadCtlSetTexture(roadCtlr_t *ctlr, texLoc_t loc, pcxImage_t *img);
 void roadCtlrAddRandomizedCar(roadCtlr_t *ctlr, int rank);
 
-// Returns the car which has been allocated
-// texNum is only used for adding the scenery object
 car_t *roadCtlAddCar(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum);
+car_t *roadCtlAddScenery(roadCtlr_t *ctlr, fixed_t x, int z, pcxImage_t *img);
+car_t *roadCtlAddSceneryChange(roadCtlr_t *ctlr, fixed_t x, int z, pcxImage_t *img);
+car_t *roadCtlAddCarObject(roadCtlr_t *ctlr, fixed_t x, int z, fixed_t speed, carType_t type, int texNum);
 void roadCtlRemoveCar(roadCtlr_t *ctlr, car_t *car);
 
 #endif

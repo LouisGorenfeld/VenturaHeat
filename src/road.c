@@ -8,7 +8,7 @@
 #include "lmath.h"
 #include "roadctlr.h" // NEARCULL/FARCULL
 
-//#define DEBUGDRAW
+#define DEBUGDRAW
 //#define DXLIMIT
 
 #define ROADH 100
@@ -455,6 +455,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
   
   int syLast = 0;
   roadObj_t *pObj;
+  roadObj_t *scenObj = live->objHead;
 
   // zmap is ordered far to near, and we are drawing near to far
   y = (dest->height - 1 - yOffset) << 16;
@@ -508,7 +509,6 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     // Finding texture y coordinate:
     // Shift 12-bit z value down to a range that repeats a reasonable
     // number of times for our 32px-high texture (arbitrary).
-    roadObj_t *scenObj = live->objHead;
     while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
       scenObj = scenObj->next;
 
@@ -528,10 +528,10 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
         sideTex[1] = scenObj->img;
 
       // Queue up next scenery change incident
-      while (scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN)
+      do {
         scenObj = scenObj->next;
+      } while(scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN);
     }
-
     
     // Bring syLast up to sy
     // Quick line doubling technique
@@ -584,7 +584,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     else if (dy < DYMIN)
       dy = DYMIN;
 
-
+/*
 #ifdef DEBUGDRAW
     if (i == ZPOSCURVETHRESH1)
       hline(dest, 0, sy, 319, 9);
@@ -593,6 +593,7 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
     if (i == ZPOSCURVETHRESH3)
       hline(dest, 0, sy, 319, 9);
 #endif
+*/
 
 //    if (y < 0 || y >= 200 << 16) // TODO: we may still want to find sprite y if below screen
 //      break;
