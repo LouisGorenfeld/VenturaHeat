@@ -20,9 +20,10 @@
 #define DYMAX (ITOFIX(1)<<4)
 #define DYMIN (-ITOFIX(1))
 
-// Line doubling is faster than interpolation for the hill effect,
-// but a lot filthier
-#define LINEDOUBLE
+// Gap fill when hill steps skip scanlines (see roadDraw):
+// Default: linear interpolation of rl/rr/zOff via LININ (lmath.h).
+// Uncomment for faster memcpy duplicate-row fill (blockier).
+// #define LINEDOUBLE
 
 // Z index of the different curve thresholds (see render function)
 // Lower is farther
@@ -454,6 +455,8 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
   
   
   int syLast = 0;
+  int rlPrev = 0, rrPrev = 0, zOffPrev = 0;
+  int havePrev = 0;
   roadObj_t *pObj;
   roadObj_t *scenObj = live->objHead;
 
@@ -533,20 +536,33 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
       } while(scenObj && scenObj->car->type != CARTYPE_DUMMY_SCEN);
     }
     
-    // Bring syLast up to sy
-    // Quick line doubling technique
-    // BUG: If sy and syLast are both below the horizon but traveling upwards again, is it overdrawing?
-    if (syLast - sy > 1)
+    /* Skip seam rows (hill / uneven z-step): interpolate road edges between last row (syLast)
+       and current (sy). d=0 -> rl at sy; d=FIXUNIT -> rlPrev at syLast. */
+    if (havePrev && syLast - sy > 1)
     {
-      for (; syLast > (sy+1); syLast--)
-      {
+      int span = syLast - sy;
 #ifdef LINEDOUBLE
-        // TODO: Implement DRAWSIDE
-        // TODO: Use asm blit; faster than memcpy
-        memcpy(dest->lines[syLast-1], dest->lines[syLast], dest->width);
-#else
-#endif
+      {
+        int tmp = syLast;
+        for (; tmp > (sy + 1); tmp--)
+          memcpy(dest->lines[tmp - 1], dest->lines[tmp], dest->width);
       }
+#else
+      {
+        int yfill;
+        for (yfill = sy + 1; yfill < syLast; yfill++)
+        {
+          if (yfill < yOmitStart || yfill > yOmitEnd)
+          {
+            fixed_t d = ((fixed_t)(yfill - sy) << FIXSHIFT) / span;
+            int riL = LININ(d, rl, rlPrev);
+            int riR = LININ(d, rr, rrPrev);
+            int zi = LININ(d, zOff, zOffPrev);
+            drawRow(dest, live, roadTex, &sideTex[0], yfill, riL, riR, zi);
+          }
+        }
+      }
+#endif
     }
 
     // Else no doubling required (might be downslope)
@@ -556,9 +572,13 @@ void roadDraw(roadLive_t *live, pcxImage_t *dest, int yOffset, int yOmitStart, i
 
     y -= dy;
     syLast = sy;
+    rlPrev = rl;
+    rrPrev = rr;
+    zOffPrev = zOff;
+    havePrev = 1;
 
     // Animate the curves and undulation as we go up the screen
-    // Do this at the end because we use dy above for line doubling
+    // Do this at the end because we use dy above for line doubling / interpolation
     // ZPOSCURVETHRESH keeps the curves mellow in the front of the screen
     // but bending more severely in the distance
     if (i <= live->segPos>>16)    
