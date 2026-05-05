@@ -614,11 +614,11 @@ void doGameDraw(void *s, pcxImage_t *buf)
   if (state->msgCountdown > 0 && (state->msgCountdown & state->msgBlinkMask)) {
     if (state->msg) {
       int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
-      blitFont(&gFontMedium, buf->pixels, state->msg, x, 70);
+      blitFont(&gFontDefault, buf->pixels, state->msg, x, 70);
     }
     if (state->msg2) {
       int x = (320 - (strlen(state->msg)*gFontMedium.fontWidth)) >> 1;
-      blitFont(&gFontMedium, buf->pixels, state->msg2, x, 70+12);
+      blitFont(&gFontDefault, buf->pixels, state->msg2, x, 70+12);
     }
   }
 

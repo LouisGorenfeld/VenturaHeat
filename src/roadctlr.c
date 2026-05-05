@@ -351,7 +351,7 @@ int roadCtlCarLogic(roadCtlr_t *ctlr) // 1=checkpoint hit, 0=no checkpoint hit
         {
           if (car->roadObj.x == 0) {
             ctlr->roadLive.roadTex = car->roadObj.img;
-            if (ctlr->roadLive.roadTex == getRoadTex(2));
+            if (ctlr->roadLive.roadTex == getRoadTex(2))
               checkpointHit = 1;
           }
           else if (car->roadObj.x == -1) {
