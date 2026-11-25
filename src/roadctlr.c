@@ -38,8 +38,7 @@ void roadCtlInit(roadCtlr_t *ctlr)
 
 
 */
-  ctlr->stage[0].cmd = "_";
-//  ctlr->stage[0].cmd = "D,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
+  ctlr->stage[0].cmd = "D,r,_,l,u,d,r,d,_,_,r,ur,r,_,dl,_,ur,dl,_,_,_";
   ctlr->stage[1].cmd = "_,l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
 //  ctlr->stage[1].cmd = "T(24),l,r,_,ur,d,_,l,u,d,r,d,dr,u,rD,l,_,_,U,D";
   ctlr->stage[2].cmd = "T(02),d,l,u,dr,u,d,_,l,r,L,L,u,d,r,R,ru,u,_,_,_"; 
